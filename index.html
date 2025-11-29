@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mama Kalendáriuma 2025</title>
+    <style>
+        :root {
+            --luxury-red: #80001a;
+            --luxury-green: #00592d;
+            --accent-light: #66ccff;
+            --gold-start: #cc9933;
+            --gold-end: #ffcc66;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --glass-bg: rgba(0, 0, 0, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0d0d33;
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- ANIMÁLT HÁTTÉR --- */
+        #background {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 50% 50%, #1a1a4d, #050510);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+        .orb-1 { width: 300px; height: 300px; background: var(--accent-light); top: 20%; left: 10%; }
+        .orb-2 { width: 250px; height: 250px; background: purple; bottom: 20%; right: 10%; animation-delay: -2s; }
+        .orb-3 { width: 350px; height: 350px; background: blue; bottom: -10%; left: 30%; animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 50px); }
+        }
+
+        /* --- HÓESÉS --- */
+        #snow-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .snowflake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+
+        /* --- FŐ TARTALOM --- */
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            z-index: 1;
+            position: relative;
+        }
+
+        /* --- CÍM & VISSZASZÁMLÁLÓ --- */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--gold-start), var(--gold-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 10px rgba(255, 165, 0, 0.3);
+        }
+        #countdown {
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--accent-light);
+            margin-top: 5px;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        /* --- RÁCS --- */
+        #calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            overflow-y: auto;
+            padding: 10px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            flex-grow: 1;
+        }
+
+        .day-box {
+            aspect-ratio: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: transform 0.1s, background 0.3s;
+            position: relative;
+        }
+        .day-box:active { transform: scale(0.95); }
+        
+        .day-box.unlocked {
+            background: rgba(102, 204, 255, 0.2);
+            border-color: var(--accent-light);
+            box-shadow: 0 0 10px var(--accent-light);
+        }
+        .day-box.locked {
+            background: rgba(255, 0, 0, 0.15);
+            border-color: rgba(255, 0, 0, 0.3);
+        }
+        .day-box .icon { font-size: 24px; margin-bottom: 5px; }
+        .day-box .lock-icon { font-size: 12px; opacity: 0.5; margin-top: 2px; }
+
+        /* --- ALSÓ MENÜ --- */
+        #bottom-menu {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .menu-btn {
+            background: var(--luxury-red);
+            color: var(--gold-end);
+            border: 1px solid var(--gold-start);
+            padding: 12px 24px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .badge {
+            position: absolute;
+            top: -5px; right: -5px;
+            background: red;
+            color: white;
+            font-size: 10px;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid #fff;
+        }
+
+        /* --- MODALS (Felugró ablakok) --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal.active { display: flex; opacity: 1; }
+        
+        .modal-content {
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            background: #fffaf0; /* Cream */
+            color: #333;
+            border-radius: 20px;
+            padding: 25px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 2px solid var(--gold-start);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header { text-align: center; margin-bottom: 15px; }
+        .modal-title { font-size: 22px; font-weight: bold; color: var(--luxury-red); font-family: "Times New Roman", serif; }
+        .modal-body { overflow-y: auto; font-size: 16px; line-height: 1.6; color: #444; flex-grow: 1; }
+        .modal-footer { margin-top: 15px; }
+        
+        .close-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--luxury-red);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- CHAT STÍLUS --- */
+        #chat-container {
+            background: rgba(0,0,0,0.8); 
+            color: white;
+            height: 100%; 
+            display: flex; flex-direction: column;
+        }
+        .chat-header { padding: 15px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .chat-list { flex-grow: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .message-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 20px; }
+        .timestamp { font-size: 10px; color: #aaa; text-align: center; margin-bottom: 5px; }
+        
+        .msg {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+        }
+        .msg.them {
+            background: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            display: flex; gap: 10px; align-items: flex-end;
+        }
+        .msg.me {
+            background: #007aff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .avatar { font-size: 24px; }
+
+        /* --- GOMBOK A CHATBEN --- */
+        .reply-options { display: flex; gap: 10px; overflow-x: auto; padding: 10px; }
+        .reply-btn {
+            background: rgba(102, 204, 255, 0.2);
+            border: 1px solid var(--accent-light);
+            color: var(--accent-light);
+            padding: 8px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        /* --- ÉRTESÍTÉSEK (TOAST) --- */
+        #notification-area {
+            position: absolute;
+            top: 10px; left: 0; width: 100%;
+            padding: 0 10px;
+            z-index: 200;
+            pointer-events: none; /* Click-through */
+        }
+        .toast {
+            background: rgba(30, 30, 30, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 10px;
+            color: white;
+            display: flex; gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: auto; /* Clickable */
+            cursor: pointer;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        
+        /* --- TESZT MENÜ --- */
+        #test-menu-btn { position: absolute; top: 20px; left: 20px; font-size: 20px; color: rgba(255,255,255,0.5); cursor: pointer; }
+        #test-panel { display: none; position: absolute; top: 60px; left: 20px; background: rgba(0,0,0,0.9); padding: 15px; border-radius: 15px; border: 1px solid white; z-index: 300; }
+
+        /* --- ÍR... ANIMÁCIÓ --- */
+        .typing-dots { display: flex; gap: 4px; padding: 5px 10px; background: #333; border-radius: 15px; width: fit-content; align-self: flex-start; margin-left: 40px; }
+        .dot { width: 6px; height: 6px; background: #aaa; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div id="snow-container"></div>
+
+    <div id="app">
+        <div id="test-menu-btn" onclick="toggleTestMenu()">⚙️</div>
+        <div id="test-panel">
+            <h3>Teszt Mód</h3>
+            <label><input type="checkbox" id="test-mode-toggle" onchange="toggleTestMode()"> Minden nyitva</label>
+            <br><br>
+            <button onclick="fullReset()">🗑️ Reset</button>
+        </div>
+
+        <header>
+            <h1>MAMA KALENDÁRIUMA 2025</h1>
+            <div id="countdown">Betöltés...</div>
+        </header>
+
+        <div id="calendar-grid">
+            </div>
+
+        <div id="bottom-menu">
+            <button class="menu-btn" onclick="openChat()">
+                💬 Üzenetek <span id="badge" class="badge" style="display:none">0</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="notification-area"></div>
+
+    <div id="story-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="story-title">Cím</div>
+            </div>
+            <div class="modal-body" id="story-text">
+                Szöveg...
+            </div>
+            <div class="modal-footer">
+                <div style="text-align:center; color: #66ccff; font-style: italic; margin-bottom: 10px; font-size: 12px;">
+                    💡 Nyisd meg az üzeneteket!
+                </div>
+                <button class="close-btn" onclick="closeModal('story-modal')">Bezárás</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-modal" class="modal" style="align-items: stretch;">
+        <div class="modal-content" style="background: black; border: 1px solid #333; width: 100%; height: 100%; max-width: 100%; max-height: 100%; border-radius: 0; padding: 0;">
+            <div class="chat-header" style="background: rgba(30,30,30,0.9); display:flex; justify-content: space-between; align-items: center; padding: 15px;">
+                <span style="font-weight:bold; color: white;">Beérkezett Üzenetek</span>
+                <button style="background:none; border:none; color: #66ccff; font-size: 16px;" onclick="closeModal('chat-modal')">Bezárás</button>
+            </div>
+            <div id="chat-list" class="chat-list">
+                </div>
+            <div id="reply-area" style="background: #111; padding: 10px;">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ADATOK ---
+        const characters = {
+            herold: { name: "Herold", icon: "🦛" },
+            hanna: { name: "Hanna", icon: "🎀" },
+            bucko: { name: "Buckó", icon: "🐳" }
+        };
+
+        const storyData = [
+            { title: "A nagy elutazás", message: "A reggel ködösen indult... Papa és Mama elindultak. Herold cocó az ablakban állt. 'Ne itasd az egereket!' – mondta Hanna. Buckó tésztaszűrővel a fején tisztelgett.", char: "hanna", msgs: ["Szia Mama! ❤️ Ne aggódj értünk, nagyon ügyesek vagyunk itt otthon! Herold már nem is sír. Vigyázz magadra! Puszilunk!", "Készítettem neked egy kis csomagot az útra. Használd ezt a Mini kézkrémet, hogy puha maradjon a kezed!"], replies: [{u: "Köszönöm, Hanna! ❤️", c: "Szívesen! Most megyek, segítek Heroldnak kipakolni. Szia! 👋"}, {u: "Ti is vigyázzatok!", c: "Ígérjük! Na szaladok, mert Buckó beszorult. Szia!"}] },
+            { title: "Első este", message: "Furcsa csend. Buckó a kádban aludt, mert hiányzott neki a tenger. A többiek a szőnyegen kempingeztek. 'Ha betörő jön, csapkodni fogok!'", char: "bucko", msgs: ["Jelentem: a ház biztonságos! A fürdőkádban alszom, onnan mindent hallok. 🐳", "Hogy te is nyugodtan aludj, küldök neked egy kis Levendulás párnapermentet. Szép álmokat!"], replies: [{u: "Jó éjt, Buckó! 🌙", c: "Neked is! Megyek csobbanok egyet. Szép álmokat! 🛁"}, {u: "Bátor vagy!", c: "Köszi! De most bebújok a habok alá. Szia! 🫧"}] },
+            { title: "Palacsinta party", message: "Hanna főzött. Lila festék került a tésztába. Az első palacsinta a plafonra ragadt. Buckó sósat kért, de spenótos lett.", char: "hanna", msgs: ["Bocsi a konyháért... 😅 Kicsit lila lett a plafon. De ígérem, letakarítjuk!", "Ha már mi összekentük magunkat, te kend be az arcodat ezzel a finom Krémes arcmaszkkal. Jót fog tenni!"], replies: [{u: "Jaj, ti kis maszatok!", c: "Hát ja... na megyek, mert csöpög a tészta. Szia!"}, {u: "Imádom a maszkot!", c: "Köszi! Most lemosom magamról a lisztet. Puszi!"}] },
+            // ... Ide jönne a többi 24 nap, most a példa kedvéért generálok placeholdereket:
+        ];
+
+        // Generáljuk le a maradékot, hogy 24 legyen
+        for(let i=storyData.length; i<24; i++) {
+            storyData.push({
+                title: `${i+1}. Nap`, 
+                message: "Még készül a karácsonyi meglepetés történet...", 
+                char: "herold", 
+                msgs: ["Szia Mama! Még dolgozunk ezen a napon!", "Addig is itt egy kis szeretet csomag!"],
+                replies: [{u: "Köszi!", c: "Szívesen! Szia!"}]
+            });
+        }
+
+        // --- ÁLLAPOT KEZELÉS ---
+        let state = {
+            unlockedDays: JSON.parse(localStorage.getItem('openedDays')) || [],
+            unreadCount: 0,
+            chatState: JSON.parse(localStorage.getItem('chatState')) || {}, // { dayNum: { responded: bool } }
+            isTestMode: false
+        };
+
+        // --- INIT ---
+        function init() {
+            renderGrid();
+            startCountdown();
+            createSnow();
+            // Ha van új, amit még nem nyitott meg chaten, számoljuk ki
+            state.unreadCount = state.unlockedDays.length - Object.keys(state.chatState).filter(k => state.chatState[k].seen).length; 
+            updateBadge();
+        }
+
+        // --- RÁCS RENDERELÉS ---
+        function renderGrid() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            const today = new Date().getDate(); // Élesben
+            
+            for (let i = 0; i < 24; i++) {
+                const dayNum = i + 1;
+                const box = document.createElement('div');
+                const isUnlocked = state.unlockedDays.includes(dayNum);
+                const isAvailable = state.isTestMode || (new Date().getMonth() === 11 && dayNum <= today); // Dec=11 JS-ben
+
+                box.className = `day-box ${isUnlocked ? 'unlocked' : (isAvailable ? '' : 'locked')}`;
+                
+                if (isUnlocked) {
+                    box.innerHTML = `<div class="icon">🎁</div>`;
+                } else if (isAvailable) {
+                    box.innerHTML = `<div>${dayNum}</div>`;
+                    box.onclick = () => openDay(dayNum);
+                } else {
+                    box.innerHTML = `<div>${dayNum}</div><div class="lock-icon">🔒</div>`;
+                    box.onclick = () => scoldUser(dayNum);
+                }
+                grid.appendChild(box);
+            }
+        }
+
+        // --- NAP NYITÁSA ---
+        function openDay(dayNum) {
+            if (!state.unlockedDays.includes(dayNum)) {
+                state.unlockedDays.push(dayNum);
+                localStorage.setItem('openedDays', JSON.stringify(state.unlockedDays));
+                state.unreadCount++;
+                updateBadge();
+                startNotificationSequence(dayNum);
+                renderGrid();
+            }
+            
+            // Mese megjelenítése
+            const dayData = storyData[dayNum - 1];
+            document.getElementById('story-title').innerText = `📜 ${dayData.title}`;
+            document.getElementById('story-text').innerText = dayData.message;
+            
+            const modal = document.getElementById('story-modal');
+            modal.classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // --- ÉRTESÍTÉSEK ---
+        function startNotificationSequence(dayNum) {
+            const data = storyData[dayNum-1];
+            const char = characters[data.char];
+            
+            // 1. Üzenet azonnal
+            showToast(char.name, data.msgs[0], char.icon);
+            
+            // 2. Üzenet (Ajándék) 4mp múlva
+            setTimeout(() => {
+                showToast(char.name, data.msgs[1], char.icon);
+            }, 4000);
+        }
+
+        function showToast(name, msg, icon) {
+            const container = document.getElementById('notification-area');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <div style="font-size:24px">${icon}</div>
+                <div>
+                    <div style="font-weight:bold; font-size:14px">${name} <span style="color:#aaa; font-weight:normal; font-size:10px; float:right">Most</span></div>
+                    <div style="font-size:12px; opacity:0.8">${msg}</div>
+                </div>
+            `;
+            toast.onclick = () => {
+                container.innerHTML = ''; // Összes törlése
+                openChat();
+            };
+            
+            // Stack effect: insert at top
+            container.insertBefore(toast, container.firstChild);
+            
+            // Animáció
+            requestAnimationFrame(() => toast.classList.add('show'));
+            
+            // Eltüntetés
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 6000);
+        }
+
+        function scoldUser(dayNum) {
+            const scolds = ["Mama! Ez még alszik! 😴", "Ejnye, ne leskelődj! 👀", "Ez az ablak még ZÁRVA van! 🔒"];
+            showToast("Rendszer", scolds[Math.floor(Math.random() * scolds.length)], "🚫");
+        }
+
+        // --- CHAT ---
+        function openChat() {
+            state.unreadCount = 0;
+            updateBadge();
+            const modal = document.getElementById('chat-modal');
+            modal.classList.add('active');
+            renderChat();
+        }
+
+        function renderChat() {
+            const list = document.getElementById('chat-list');
+            const replyArea = document.getElementById('reply-area');
+            list.innerHTML = '';
+            replyArea.innerHTML = '';
+            
+            // Végigmegyünk a nyitott napokon
+            state.unlockedDays.sort((a,b) => a-b).forEach(dayNum => {
+                const data = storyData[dayNum-1];
+                const char = characters[data.char];
+                const dayState = state.chatState[dayNum] || {};
+                
+                // Dátum elválasztó
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'timestamp';
+                dateDiv.innerText = `December ${dayNum}.`;
+                list.appendChild(dateDiv);
+                
+                // Plüss üzenetei
+                data.msgs.forEach(msg => {
+                    appendMsg(list, msg, 'them', char.icon);
+                });
+
+                // Ha már válaszoltunk
+                if (dayState.responseIndex !== undefined) {
+                    const reply = data.replies[dayState.responseIndex];
+                    appendMsg(list, reply.u, 'me');
+                    appendMsg(list, reply.c, 'them', char.icon);
+                } 
+                // Ha még nem válaszoltunk, és ez a legutolsó nyitott nap
+                else if (dayNum === Math.max(...state.unlockedDays)) {
+                     // Gombok generálása
+                     const optionsDiv = document.createElement('div');
+                     optionsDiv.className = 'reply-options';
+                     data.replies.forEach((reply, idx) => {
+                         const btn = document.createElement('button');
+                         btn.className = 'reply-btn';
+                         btn.innerText = reply.u;
+                         btn.onclick = () => sendReply(dayNum, idx);
+                         optionsDiv.appendChild(btn);
+                     });
+                     replyArea.appendChild(optionsDiv);
+                }
+            });
+            
+            // Scroll to bottom
+            list.scrollTop = list.scrollHeight;
+            
+            // Mark as seen logic could go here
+            state.unlockedDays.forEach(d => {
+                if(!state.chatState[d]) state.chatState[d] = {};
+                state.chatState[d].seen = true;
+            });
+            localStorage.setItem('chatState', JSON.stringify(state.chatState));
+        }
+
+        function appendMsg(container, text, type, icon) {
+            const div = document.createElement('div');
+            div.className = `msg ${type}`;
+            if (type === 'them') {
+                div.innerHTML = `<div class="avatar">${icon}</div><div>${text}</div>`;
+            } else {
+                div.innerText = text;
+            }
+            container.appendChild(div);
+        }
+
+        function sendReply(dayNum, idx) {
+            // 1. User üzenet megjelenik
+            const list = document.getElementById('chat-list');
+            const data = storyData[dayNum-1];
+            const reply = data.replies[idx];
+            const char = characters[data.char];
+            
+            document.getElementById('reply-area').innerHTML = ''; // Gombok eltűnnek
+            appendMsg(list, reply.u, 'me');
+            list.scrollTop = list.scrollHeight;
+
+            // 2. Ír... animáció
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-dots';
+            typingDiv.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+            list.appendChild(typingDiv);
+            list.scrollTop = list.scrollHeight;
+
+            // 3. Válasz 2mp múlva
+            setTimeout(() => {
+                typingDiv.remove();
+                appendMsg(list, reply.c, 'them', char.icon);
+                list.scrollTop = list.scrollHeight;
+                
+                // Mentés
+                if (!state.chatState[dayNum]) state.chatState[dayNum] = {};
+                state.chatState[dayNum].responseIndex = idx;
+                localStorage.setItem('chatState', JSON.stringify(state.chatState));
+            }, 2000);
+        }
+
+        // --- EGYÉB ---
+        function updateBadge() {
+            const badge = document.getElementById('badge');
+            if (state.unreadCount > 0) {
+                badge.style.display = 'flex';
+                badge.innerText = state.unreadCount;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function startCountdown() {
+            const target = new Date("Dec 24, 2025 18:00:00").getTime();
+            setInterval(() => {
+                const now = new Date().getTime();
+                const diff = target - now;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('countdown').innerText = `Karácsonyig: ${days} nap ${hours} óra ${minutes} perc`;
+            }, 1000);
+        }
+
+        function createSnow() {
+            const container = document.getElementById('snow-container');
+            for(let i=0; i<50; i++) {
+                const snow = document.createElement('div');
+                snow.className = 'snowflake';
+                snow.style.left = Math.random() * 100 + '%';
+                snow.style.width = snow.style.height = (Math.random() * 5 + 2) + 'px';
+                snow.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                snow.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(snow);
+            }
+        }
+        
+        // --- TESZT ---
+        function toggleTestMenu() {
+            const panel = document.getElementById('test-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+        function toggleTestMode() {
+            state.isTestMode = document.getElementById('test-mode-toggle').checked;
+            renderGrid();
+        }
+        function fullReset() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        // Indítás
+        init();
+
+    </script>
+</body>
+</html>
