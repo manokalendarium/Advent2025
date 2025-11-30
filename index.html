@@ -50,9 +50,23 @@
             width: 100%; max-width: 480px; height: 100%; 
             display: flex; flex-direction: column; position: relative;
             background: rgba(0,0,0,0.2);
-            overflow: hidden; /* Fontos, hogy a chat képernyő ne lógjon ki */
+            overflow: hidden;
         }
 
+        /* --- API KULCS MODAL --- */
+        .api-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 999; display: flex; align-items: center; justify-content: center;
+        }
+        .api-card {
+            width: 85%; background: #1C1C1E; padding: 30px; border-radius: 24px; text-align: center; border: 1px solid #333;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        .api-input {
+            width: 100%; padding: 12px; margin: 15px 0; background: #2C2C2E; border: 1px solid #444; border-radius: 12px; color: white; font-size: 16px;
+            outline: none;
+        }
+        
         /* --- HEADER, GRID, TAB BAR (GRID VIEW) --- */
         .grid-view-container {
             flex: 1;
@@ -134,7 +148,7 @@
             pointer-events: auto;
         }
         .story-card {
-            width: 85%; max-height: 70%; background: #1C1C1E;
+            width: 85%; max-height: 80%; background: #1C1C1E; 
             border-radius: 24px; padding: 24px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             border: 1px solid rgba(255,255,255,0.1);
@@ -145,11 +159,22 @@
             transform: scale(1);
         }
         .story-title { font-size: 22px; font-weight: 700; margin-bottom: 15px; color: white; text-align: center; }
-        .story-text { font-size: 17px; line-height: 1.5; color: #ddd; overflow-y: auto; flex: 1; margin-bottom: 20px; font-family: "Times New Roman", serif; }
-        .story-btn {
-            background: #007AFF; color: white; border: none; padding: 14px;
-            border-radius: 14px; font-size: 17px; font-weight: 600; width: 100%; cursor: pointer;
+        .story-text { 
+            font-size: 17px; line-height: 1.5; color: #ddd; overflow-y: auto; flex: 1; margin-bottom: 5px; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            text-align: justify; padding-right: 5px;
         }
+        .story-text p { margin: 1em 0; }
+        .story-btn {
+            background: #007AFF; color: white; border: none; padding: 10px;
+            border-radius: 14px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer;
+            transition: all 0.1s;
+        }
+        .story-btn:active { transform: scale(0.98); }
+        .dot-indicator {
+            width: 8px; height: 8px; border-radius: 50%; background: #444; transition: background 0.3s;
+        }
+        .dot-indicator.active { background: #007AFF; }
 
         /* --- CHAT KÉPERNYŐK --- */
         .chat-screen-container {
@@ -158,13 +183,10 @@
             display: flex; flex-direction: column;
             transform: translateX(100%); transition: transform 0.3s ease-out;
         }
-        .chat-screen-container.list-active {
+        .chat-screen-container.active {
             transform: translateX(0);
         }
-        .chat-screen-container.detail-active {
-            transform: translateX(0);
-        }
-        /* ... (további chat stílusok) */
+        
         .chat-header {
             background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(20px);
             padding: 15px 10px; display: flex; align-items: center;
@@ -180,11 +202,30 @@
         .chat-body {
             flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px;
             padding-bottom: 80px;
+            scroll-behavior: smooth; 
         }
-        .message-row { display: flex; width: 100%; margin-bottom: 4px; }
+        .message-row { display: flex; width: 100%; margin-bottom: 4px; opacity: 0; animation: fadeIn 0.3s forwards; }
         .message-row.me { justify-content: flex-end; }
         .message-row.them { justify-content: flex-start; align-items: flex-end; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
         .avatar-small { width: 30px; height: 30px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-right: 8px; }
+        
+        /* KÉP ÜZENET STÍLUS */
+        .bubble.image-bubble {
+            background: none; 
+            padding: 0; 
+            border-radius: 20px 20px 20px 4px;
+            overflow: hidden;
+            max-width: 75%;
+        }
+        .bubble.image-bubble img {
+            max-width: 100%;
+            display: block;
+            border-radius: 12px; 
+            filter: brightness(0.95);
+        }
+
         .bubble {
             max-width: 75%; padding: 10px 16px; font-size: 17px; line-height: 1.4; position: relative;
         }
@@ -207,6 +248,7 @@
         .send-circle {
             width: 30px; height: 30px; background: #007AFF; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; cursor: pointer;
+            transition: all 0.2s; 
         }
         .send-circle.disabled { background: #444; color: #888; pointer-events: none; }
         .typing-bubble {
@@ -217,7 +259,8 @@
         .dot:nth-child(1) { animation-delay: -0.32s; } .dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
         .reply-chips { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; background: rgba(20, 20, 20, 0.9); border-top: 1px solid rgba(255,255,255,0.1); }
-        .chip { background: #1C1C1E; color: #007AFF; border: 1px solid #007AFF; padding: 8px 16px; border-radius: 20px; font-size: 15px; white-space: nowrap; cursor: pointer; }
+        .chip { background: #1C1C1E; color: #007AFF; border: 1px solid #007AFF; padding: 8px 16px; border-radius: 20px; font-size: 15px; white-space: nowrap; cursor: pointer; transition: background 0.1s; }
+        .chip:active { background: #007AFF; color: white; }
         
         /* --- iOS NOTIFICATION --- */
         .notification-container {
@@ -227,7 +270,6 @@
             position: absolute; top: 10px; left: 10px; right: 10px;
             background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(25px);
             border-radius: 18px; padding: 12px;
-            display: flex; gap: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.5);
             pointer-events: auto; cursor: pointer;
             animation: notifSlide 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             border: 1px solid rgba(255,255,255,0.1);
@@ -286,8 +328,20 @@
             <div id="story-modal" class="modal-overlay">
                 <div class="story-card">
                     <div id="story-title" class="story-title"></div>
-                    <div id="story-text" class="story-text"></div>
-                    <button id="story-chat-btn" class="story-btn">Megnézem az üzenetet</button>
+                    
+                    <div id="story-page-1" class="story-text story-page"></div> 
+                    <div id="story-page-2" class="story-text story-page" style="display:none;"></div>
+                    
+                    <div id="story-nav" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                        <button id="story-prev-btn" class="story-btn" style="width:45%; background:rgba(255,255,255,0.1); color:#fff;"><i class="bi bi-chevron-left"></i> Előző</button>
+                        <div id="story-dots" style="display:flex; gap:8px;">
+                            <span id="dot-1" class="dot-indicator active"></span>
+                            <span id="dot-2" class="dot-indicator"></span>
+                        </div>
+                        <button id="story-next-btn" class="story-btn" style="width:45%;">Következő <i class="bi bi-chevron-right"></i></button>
+                    </div>
+
+                    <button id="story-close-btn" class="story-btn" style="margin-top:15px;">Bezárás</button>
                 </div>
             </div>
 
@@ -300,7 +354,7 @@
                     </div>
             </div>
 
-            <div id="chat-screen-detail" class="chat-screen-container" style="display:none;">
+            <div id="chat-screen-detail" class="chat-screen-container">
                 <div class="chat-header">
                     <div id="chat-detail-back-btn" class="back-btn"><i class="bi bi-chevron-left"></i> Vissza</div>
                     <div id="chat-detail-avatar-header" class="chat-avatar-header">
@@ -310,7 +364,6 @@
                     <div style="width:50px;"></div>
                 </div>
                 <div id="chat-detail-body" class="chat-body">
-                    <div style="text-align:center; color:#666; font-size:11px; margin:10px 0;">iMessage • Ma</div>
                     </div>
                 <div id="reply-chips" class="reply-chips" style="display:none;">
                     </div>
@@ -330,8 +383,13 @@
             gridView: document.getElementById('grid-view'),
             storyModal: document.getElementById('story-modal'),
             storyTitle: document.getElementById('story-title'),
-            storyText: document.getElementById('story-text'),
-            storyChatBtn: document.getElementById('story-chat-btn'),
+            storyPage1: document.getElementById('story-page-1'), 
+            storyPage2: document.getElementById('story-page-2'), 
+            storyPrevBtn: document.getElementById('story-prev-btn'),
+            storyNextBtn: document.getElementById('story-next-btn'),
+            storyDot1: document.getElementById('dot-1'),
+            storyDot2: document.getElementById('dot-2'),
+            storyCloseBtn: document.getElementById('story-close-btn'), 
             countdown: document.getElementById('countdown'),
             unreadBadge: document.getElementById('unread-badge'),
             tabGrid: document.getElementById('tab-grid'),
@@ -353,35 +411,396 @@
         };
 
         const CHARACTERS = {
-            hanna: { name: "Hanna", icon: "🎀", desc: "rózsaszín, gondoskodó lány víziló", style: "Kedves, anyáskodó, sok emojit használ." },
-            herold: { name: "Herold", icon: "🦛", desc: "lila, pufók és falánk víziló", style: "Vicces, éhes, szeleburdi." },
-            bucko: { name: "Buckó", icon: "🐳", desc: "kék, bátor kis bálna", style: "Bátor, lelkes, vizet emleget." }
+            hanna: { name: "Hanna", icon: "🎀", desc: "rózsaszín, gondoskodó lány víziló", style: "Kedves, anyáskodó, sok emojit használ.", key: "hanna" },
+            herold: { name: "Herold", icon: "🦛", desc: "lila, pufók és falánk víziló", style: "Vicces, éhes, szeleburdi.", key: "herold" },
+            bucko: { name: "Buckó", icon: "🐳", desc: "kék, bátor kis bálna", style: "Bátor, lelkes, vizet emleget.", key: "bucko" }
         };
 
-        const STORY_DATA = [
-            { id: 1, title: "A nagy elutazás", message: "A reggel ködösen indult... Papa és Mama elindultak. Herold cocó az ablakban állt. 'Ne itasd az egereket!' – mondta Hanna. Buckó tésztaszűrővel a fején tisztelgett.", char: "hanna", msgs: ["Szia Mama! ❤️ Ne aggódj értünk, nagyon ügyesek vagyunk itt otthon! Herold már nem is sír. Vigyázz magadra! Puszilunk!", "Készítettem neked egy kis csomagot az útra. Használd ezt a Mini kézkrémet, hogy puha maradjon a kezed!"], replies: [{u: "Köszönöm, Hanna! ❤️", c: "Szívesen! Most megyek, segítek Heroldnak kipakolni. Szia! 👋"}, {u: "Ti is vigyázzatok!", c: "Ígérjük! Na szaladok, mert Buckó beszorult. Szia!"}] },
-            { id: 2, title: "Első este", message: "Furcsa csend. Buckó a kádban aludt, mert hiányzott neki a tenger. A többiek a szőnyegen kempingeztek. 'Ha betörő jön, csapkodni fogok!'", char: "bucko", msgs: ["Jelentem: a ház biztonságos! A fürdőkádban alszom, onnan mindent hallok. 🐳", "Hogy te is nyugodtan aludj, küldök neked egy kis Levendulás párnapermentet. Szép álmokat!"], replies: [{u: "Jó éjt, Buckó! 🌙", c: "Neked is! Megyek csobbanok egyet. Szép álmokat! 🛁"}, {u: "Bátor vagy!", c: "Köszi! De most bebújok a habok alá. Szia! 🫧"}] },
+        const CHAT_CONTACTS = [
+            CHARACTERS.hanna,
+            CHARACTERS.herold,
+            CHARACTERS.bucko,
         ];
-        // Adatok generálása 24 napra (a 3. naptól)
-        for(let i=3; i<=24; i++) {
-            STORY_DATA.push({ id: i, title: `${i}. Nap`, message: "A történet hamarosan érkezik...", char: "herold", msgs: ["Szia Mama! Még készülünk!", "Itt egy kis szeretet csomag neked!"], replies: [{u: "Köszi!", c: "Puszi!"}] });
-        }
+        
+        // --- FRISSÍTETT STORY DATA KÉT RÉSZRE OSZTVA, HOSSZABB ÜZENETEKKEL és KÉP ADATOKKAL ---
+        const STORY_DATA = [
+            // 1. HANNA (Gondoskodó) - A nagy elutazás
+            { 
+                id: 1, 
+                char: "hanna", 
+                title: "A nagy elutazás", 
+                storyPage1: "A reggel ködösen indult, a levegőben már érezni lehetett a tél illatát. Papa és Mama óriási bőröndöket cipeltek ki az autóhoz. Herold cocó az ablakban állt, és az orrát az üveghez nyomta, amitől az egy kicsit lapos és vicces lett. Egy apró könnycsepp csillogott a szemében. – Ne szomorkodj, Herold! – lépett oda hozzá Hanna cocó, és bátran átölelte testvérét. – Mienk az egész ház, azt csinálunk, amit akarunk!", 
+                storyPage2: "Ekkor megjelent Buckó, a kis bálna, fején egy fordított tésztaszűrővel, ami úgy nézett ki, mint egy sisak. – Jelentem, a bázis védelmét átvettem! – harsogta mély hangján. – Senki nem léphet be engedély nélkül, csak a postás, ha hoz csomagot! Papa és Mama megígérték: karácsonyra, mire az első csillag feljön, itthon lesznek.", 
+                storyImageText: "Nézd, épp most készítettem egy képet, ahogy integetünk!", // Kép bevezető szövege
+                storyImageUrl: "placeholder_day1.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Szia Mama! Remélem, kényelmes az utazásotok! ❤️ Ne aggódj egy percet sem, Herold is egészen megnyugodott, miután megkapta a második ölelést. Nagyon ügyesek vagyunk itthon, és felelősségteljesen vigyázunk a házra és Buckóra is. Vigyázz magadra, és puszilunk nagyon! 🎀", 
+                    "Készítettem neked egy kis csomagot az útra. Használd ezt a Mini kézkrémet, hogy puha maradjon a kezed!"
+                ], 
+                replies: [{u: "Köszönöm, Hanna! ❤️", c: "Szívesen! Most megyek, segítek Heroldnak kipakolni. Szia! 👋"}, {u: "Ti is vigyázzatok!", c: "Ígérjük! Na szaladok! Szia!"}]
+            },
+            // 2. BUCKÓ (Bátor, lelkes) - Az első csendes este
+            { 
+                id: 2, 
+                char: "bucko", 
+                title: "Az első csendes este", 
+                storyPage1: "Furcsa volt a ház a szülők nélkül. Valahogy minden árnyék nagyobbnak tűnt, és a padló is hangosabban recsegett, mintha lépkedne valaki. – Szerintetek a szellem, aki a padláson lakik, szereti a kakaót? – kérdezte Herold vacsora közben remegő hangon, és a takarója alá bújt. – Nincs is szellem, csak a szél zörgeti a cserepeket! – nyugtatta meg Hanna, bár ő is sűrűbben pislogott a sötét folyosó felé.", 
+                storyPage2: "Buckó nem félt. Ő a fürdőkádban rendezte be a főhadiszállását, mert hiányzott neki a tenger. – A vízben jobban terjed a hang! – magyarázta a többieknek. – Ha betörő jön, azonnal jelezni fogok: csapkodni fogok a farkammal, jó hangosan! Végül mindhárman a fürdőszoba szőnyegén aludtak el, a csöpögő csap megnyugtató ritmusára.", 
+                storyImageText: "Nézd, épp most készítettem egy képet a főhadiszállásról!",
+                storyImageUrl: "placeholder_day2.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Jelentem a Mama Kalendáriumába: a ház teljesen biztonságos! A fürdőkádban alvás a legbiztosabb megoldás, onnan mindent hallok, ami a házban történik, és a recsegő padló sem tud meglepni! Ne aggódj Mama, minden a legnagyobb rendben! 🐳", 
+                    "Hogy te is nyugodtan aludj, küldök neked egy kis Levendulás párnapermentet. Szép álmokat!"
+                ], 
+                replies: [{u: "Jó éjt, Buckó! 🌙", c: "Neked is! Megyek csobbanok egyet a bázison. Szép álmokat! 🛁"}, {u: "Bátor vagy!", c: "Köszi! A tenger ereje velem van! Szia! 🫧"}] 
+            },
+            // 3. HANNA (Rendrakó) - A lila palacsinta party
+            { 
+                id: 3, 
+                char: "hanna", 
+                title: "A lila palacsinta party", 
+                storyPage1: "– Ma én vagyok a szakács! – jelentette ki Hanna cocó másnap reggel, és felkötötte Mama legnagyobb kötényét, amiben kétszer is elfért volna. Úgy döntöttek, palacsintát sütnek. De nem akármilyet! Herold lila ételfestéket csempészett a tésztába, Hanna pedig rózsaszín cukorkákat szórt bele.", 
+                storyPage2: "– Hopp! – Hanna feldobta az első palacsintát, de az nem esett le. – Hova tűnt? – kérdezte Herold. Mindketten felnéztek: a lila tészta rátapadt a plafonra, mint egy furcsa csillár. Buckó speciális, sós palacsintát kért, de mivel nem volt alga otthon, spenóttal helyettesítették. A végén a konyha úgy nézett ki, mintha felrobbannt volna egy szivárványgyár, de a palacsinta isteni finom volt!", 
+                storyImageText: "Nézd, mi lett az első palacsintából! 😅",
+                storyImageUrl: "placeholder_day3.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Bocsi, Mama, a konyháért... 😅 Kicsit elszaladt velünk a palacsinta-fantázia, és igen, lila lett a plafon. De ígérjük, holnap egy nagy takarító hadműveletet indítunk, és nyoma sem marad a lila katasztrófának! Remélem, neked jobban telik a napod, mint nekünk a nagytakarítás! 🎀", 
+                    "Ha már mi összekentük magunkat, te kend be az arcodat ezzel a finom KrémArcmaszkkal. Jót fog tenni!"
+                ], 
+                replies: [{u: "Jól szóraztok! 😄", c: "Nagyon! Palacsintát még! Szia! 😜"}, {u: "A plafonon még van?", c: "Igen! De már közel a takarítás! Szia!"}]
+            },
+            // 4. HEROLD (Szeleburdi) - A nagy takarító hadművelet
+            { 
+                id: 4, 
+                char: "herold", 
+                title: "A nagy takarító hadművelet", 
+                storyPage1: "Másnap reggel szörnyű látvány fogadta őket a konyhában. A tegnapi palacsintázás nyomai mindenhol ott éktelenkedtek. A liszt úgy szállt a levegőben, mint a hóesés, a padló pedig ragadt a sziruptól. – Ezt nem hagyhatjuk így, mit szólnak majd Anyáék? – sóhajtott Hanna. Herold előhozta a porszívót, amit 'Szörnyetegnek' hívott, mert mindig megpróbálta bekapni a lábujját.", 
+                storyPage2: "Buckó vállalta a felmosást. Teletöltötte a száját vízzel, és mint egy kis tűzoltóautó, végigspriccelte a követ. – Buckó! Ez nem medencés buli! – kiáltotta Herold, miközben elcsúszott egy tócsában, és végigszánkázott a nappalin. Délutánra mégis csillogott-villogott minden. Még a plafonról is lekaparták a rászáradt palacsintát.", 
+                storyImageText: "Nézd, így néz ki, amikor szánkázunk a nappaliban! 😅",
+                storyImageUrl: "placeholder_day4.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama! Ma én voltam a porszívó-király! 👑 Bár elcsúsztam Buckó felmosó-tócsájában és szánkóztam egyet a nappaliban, de a ház ragyog! A plafon is tiszta lett. Olyan fárasztó volt, hogy most egy órát pihenni fogok. Büszke lennél ránk! Remélem, te is pihensz egy kicsit a sok munka közben. 🦛", 
+                    "Neked csak a pihenés maradt: itt van egy Micellás víz, hogy az arcod is olyan tiszta legyen, mint a padlónk!"
+                ], 
+                replies: [{u: "Jól sikerült a szánkó?", c: "A lábamnak nem annyira, de a szórakozás 10/10! Szia! 😜"}, {u: "Mi az a Szörnyeteg?", c: "A porszívó! Mindig meg akar enni! Szia!"}]
+            },
+            // 5. BUCKÓ (Kalandor) - Kincsvadászat a padláson
+            { 
+                id: 5, 
+                char: "bucko", 
+                title: "Kincsvadászat a padláson", 
+                storyPage1: "Az eső esett, így nem mehettek ki az udvarra. Felmentek a padlásra, ahol a régi dobozok között kutattak. A porcicák táncot jártak a beszűrődő fényben. – Nézzétek! – kiáltotta Buckó. – Ez egy igazi kalóztérkép! Egy megsárgult papír volt az, amin furcsa vonalak kanyorogtak a nappali alaprajzán. – Itt az X! A kanapé alatt! – suttogta izgatottan Herold. – Biztosan aranyat rejt!", 
+                storyPage2: "Lemosakodtak a földszintre, és hason csúszva, lámpással a kézben bekúsztak a kanapé alá. Kincsesláda helyett találtak: két elveszettnek hitt legókockát, egy mogyorót és Papa fél pár papucsát, amit már tavaly óta keresett. – Ez a papucs értékesebb bármilyen aranynál! Papa nagyon örülni fog! – állapította meg bölcsen Hanna.", 
+                storyImageText: "Nézd, elkészítettem a kincstérkép fotóját!",
+                storyImageUrl: "placeholder_day5.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Képzeld Mama! Találtunk egy igazi kincset, kalandor módjára, a padláson és a kanapé alatt! 🏴‍☠️ Jó, nem aranyat, hanem Papa fél pár papucsát, de szerintem ez még értékesebb! Főleg, hogy tavaly óta keresi! Jól elfáradtunk a nagy bújásban! 🐳", 
+                    "De neked találtunk igazi aranyat! Tedd fel ezt az Arany szemmaszkot, és ragyogj!"
+                ], 
+                replies: [{u: "Micsoda kincsek! 🤣", c: "A papucs a legnagyobb trófea! Szia! 🥇"}, {u: "Vigyázzatok a padláson!", c: "Teljesen biztonságos! A porcicák is kedvesek! Szia!"}]
+            },
+            // 6. HANNA (Gondoskodó) - Készülődés a Mikulásra
+            { 
+                id: 6, 
+                char: "hanna", 
+                title: "Készülődés a Mikulásra", 
+                storyPage1: "December 5-e estéje volt. A legfontosabb feladat várt rájuk: a cipőpucolás. Herold a legnagyobb téli bakancsát vette elő, és addig dörzsölte, amíg látni nem lehetett benne az arcát. – Ebbe sok csoki fér! – kacsintott. Hanna a legcsinosabb lakkcipőjét fényesítette ronggyal.", 
+                storyPage2: "De mi legyen Buckóval? Neki nincs lába, így cipője sincs. Szomorúan lógatta az orrát. – Ne búsulj, Buckó! – mondta Hanna. – Itt van a felmosóvödör! Kitisztítjuk, és ez lesz a te csizmád! Este mindhárman az ablakba tették a lábbeliket (és a vödröt), majd izgatottan figyelték az eget. – Szerintetek a rénszarvasok tudnak úszni? – kérdezte Buckó ásítva, mielőtt elnyomta az álom.", 
+                storyImageText: "Nézd, ez a vödör lesz Buckó csizmája! 😉",
+                storyImageUrl: "placeholder_day6.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Kifényesítettük az összes cipőt! ✨ Nagyon izgatottak vagyunk, alig várjuk a reggelt! Ne aggódj Buckó miatt, neki adtuk a felmosóvödröt, úgy gondoltuk, az a legalkalmasabb egy bálnának. Szerinted a Mikulás hoz neki abba is ajándékot? Remélem! Drukkolj nekünk! 🎀", 
+                    "Itt az ideje, hogy a te körmeid is ragyogjanak! Küldünk egy szép Körömlakkot az ünnepekre. 💅"
+                ], 
+                replies: [{u: "Micsoda csapatmunka! 🥰", c: "Igen! Különleges csizmák! Szia! 😊"}, {u: "Melyikbe fér a legtöbb csoki?", c: "Herold bakancsába! De Buckóé a legviccesebb! Szia!"}]
+            },
+            // 7. BUCKÓ (Vízi élmény) - Mit hozott a Télapó?
+            { 
+                id: 7, 
+                char: "bucko", 
+                title: "Mit hozott a Télapó?", 
+                storyPage1: "Reggel még a nap sem kelt fel, de Herold már kiugrott az ágyból. – Itt járt! ITT JÁRT! – visította, és berontott a nappaliba. A bakancsok tele voltak finomsággal. Herold kapott egy zacskó lila gumicukrot és egy kis autót. Hanna cipőjében csillogó hajcsatok és mogyorós csoki lapult.", 
+                storyPage2: "És Buckó vödre? Az volt a legnehezebb! Tele volt vízi-játékokkal és egy hatalmas csomag gumihallal. – Mégis tudta! – ujjongott Buckó, és belevetette magát a vödörbe. – Tudta, hogy itt lakik egy bálna! Egész délelőtt csokit ettek reggelire, ebédre és uzsonnára is. (De fogat mosni azért nem felejtettek el!)", 
+                storyImageText: "Nézd, a Mikulás ajándéka a vödrömben! 😍",
+                storyImageUrl: "placeholder_day7.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "MAMA!!! A Mikulás tudta, hogy itt lakom, és mit szeretek!!! 😍 Hozott gumihalat a vödrömbe, tele van vízi kincsekkel! Ez a legjobb napom! Most gyorsan megeszem az összes csokit, mielőtt Herold elveszi! Nagyon boldog vagyok! 🐳", 
+                    "Neked is hozott valamit! Ezt a puha Selyem hajgumit a kis dobozban találod. 🎀"
+                ], 
+                replies: [{u: "De falánk vagy! 😂", c: "Tudod, hogy szeretem az édeset! Szia! 🐷"}, {u: "Buckó gumihalai a legnagyobb kincs?", c: "Igen! Az volt a legmenőbb ajándék! Szia! 🐠"}]
+            },
+            // 8. HEROLD (Szeleburdi) - Az első hópihék
+            { 
+                id: 8, 
+                char: "herold", 
+                title: "Az első hópihék", 
+                storyPage1: "Délután valami csoda történt. Az égből apró, fehér vattacukrok kezdtek hullani. – HÓ! – kiáltotta egyszerre a három barát, és az ablakhoz tapadtak. Gyorsan felöltöztek. Hanna sálat kötött, Herold sapkát húzott, Buckó pedig kapott egy speciális, vízálló kis mellényt, hogy ne fázzon a hasa a hidegben.", 
+                storyPage2: "A kert fehérbe öltözött. Herold kinyújtotta a nyelvét, és elkapott egy hópihét. – Milyen íze van? – kérdezte Hanna. – Olyan, mint a hideg limonádé, csak citrom és cukor nélkül! – válaszolta Herold. Buckó megpróbált 'hóangyalt' csinálni, de mivel nincsenek karjai és lábai, inkább egy nagy 'hó-kiflit' sikerült alkotnia a hóban hempergőzve.", 
+                storyImageText: "Nézd, ez lett Buckó hó-kiflije! 🤣",
+                storyImageUrl: "placeholder_day8.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, esik a hó! ❄️ Nagyon vicces! Meg is kóstoltam, olyan mint a fagyott víz, csak íz nélkül. Kint vagyunk, játszunk, és csináltunk egy hatalmas hó-kiflit is Buckóval. Kicsit hideg van, de nem fázunk! Készülünk a nagy hócsatára! 🦛", 
+                    "Hogy te se fázz, itt egy finom illatú Testápoló. Kend be magad vele fürdés után! 🥥"
+                ], 
+                replies: [{u: "Hó-kifli! 😂", c: "Próbáld ki! A bálnáknak ez jár! Szia! 🐋"}, {u: "Vigyázzatok, meg ne fázzatok!", c: "Vízálló vagyok! Kicsit sem fázom! Szia!"}]
+            },
+            // 9. BUCKÓ (Kalandor) - Hó-bálna építés
+            { 
+                id: 9, 
+                char: "bucko", 
+                title: "Hó-bálna építés", 
+                storyPage1: "Mindenki hóembert épít télen. De nem ők! Ők valami különlegeset akartak. – Építsünk egy Hó-bálnát! – javasolta Hanna, és Buckóra kacsintott. Hatalmas hógolyókat gyúrtak össze, de nem egymás tetejére tették őket, hanem egymás mellé, hosszú sorban. A Hó-bálna uszonya jégcsapból készült, a szeme pedig két nagy darab szén volt, amit a fészerben találtak.", 
+                storyPage2: "– De mi legyen az orrával? – tűnődött Herold. Végül egy sárgarépát nyomtak a feje tetejére. – Ez nem az orra, te butus! Ez a légzőnyílása! – magyarázta büszkén Buckó, és boldogan pózolt a hóból készült, fagyos hasonmása mellett.", 
+                storyImageText: "Nézd, így néz ki a Hó-bálna sárgarépa légzőnyílása!",
+                storyImageUrl: "placeholder_day9.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, képzeld! Csináltunk egy hóembert, ami úgy néz ki, mint én, egy hatalmas Hó-bálnát! ☃️ Olyan nagy lett, mint egy kis sziget! Van légzőnyílása is a tetején, pont mint nekem! Nagyon hideg a kezem, de megérte! Küldünk róla fotót (gondolatban)! 🐳", 
+                    "A bálnák és a Hó-bálnák is imádják a vizet. Ezt a Hidratáló fátyolmaszkot neked küldöm, hogy hidratált maradj! 💧"
+                ], 
+                replies: [{u: "Hogy néz ki a bálna?", c: "Nagyon pufók! Szia! 🐋"}, {u: "Mekkora lett?", c: "Hatalmas! Látnod kell! Szia!"}]
+            },
+            // 10. HEROLD (Falánk) - A forró csoki hadművelet
+            { 
+                id: 10, 
+                char: "herold", 
+                title: "A forró csoki hadművelet", 
+                storyPage1: "A nagy hóban játék után mindhárman vacogva mentek be a házba. Az orruk piros volt, a kezük jéghideg. – Forró csoki idő! – jelentette be Hanna határozottan. Feltették a tejet a tűzhelyre. Herold feladata volt a csokoládé tördelése, de valahogy minden harmadik kocka a szájában kötött ki a lábas helyett.", 
+                storyPage2: "– Herold, ha így folytatod, csak forró tejünk lesz csoki nélkül! – nevetett Hanna. Végül elkészült a gőzölgő ital. Tettek bele tejszínhabot, és annyi pillecukrot, hogy azok kis szigetekként úszkáltak a tetején. Buckó bögréje akkora volt, mint egy váza, de egy hajtásra kiitta az egészet.", 
+                storyImageText: "Nézd a mi pillecukor szigetünket a csokiban! ☕",
+                storyImageUrl: "placeholder_day10.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama! Főztünk forró csokit! ☕ Kicsit sok lett a pillecukor, mert véletlenül beleborult az egész zacskó, de így legalább nagyon édes! Én is sokat ittam, remélem, nem fog fájni a pocim, de nagyon finom volt! Most éppen Buckóval nézzük a pillecukor szigeteket a bögrénkben. Melegít téged is! 🦛", 
+                    "Neked küldünk egy kis extra melegséget: egy Melegítő szemmaszkot. Pihenj le vele 10 percre! ☕"
+                ], 
+                replies: [{u: "Finom volt? 😋", c: "Mennyei! Buckó az egészet megitta! Szia! 🥰"}, {u: "Herold, csak a csoki... 😅", c: "Bocsánat! De megérdemlem! Szia! 😉"}]
+            },
+            // 11. HANNA (Gondoskodó) - Levél a távolba
+            { 
+                id: 11, 
+                char: "hanna", 
+                title: "Levél a távolba", 
+                storyPage1: "Már nagyon hiányoztak a szülők. Esténként sokat beszélgettek róluk. – Írjunk nekik levelet! – javasolta Herold. Elővettek egy nagy ív papírt és a színes ceruzákat. Herold lerajzolta a Hó-bálnát (bár inkább hasonlított egy nagy fehér krumplira, aminek kalapja van). Hanna gyöngybetűkkel ráírta: 'Nagyon jól vagyunk, de a palacsinta a plafonra ragadt (már leszedtük!).'", 
+                storyPage2: "Buckó is akart írni. – Én bálnanyelven üzenek! – mondta. Bemártotta az uszonyát a kék festékbe, és egy nagy pacát nyomott a papír közepére. – Ez azt jelenti: Szeretlek titeket! – fordította le büszkén a többieknek.", 
+                storyImageText: "Nézd, ez Buckó üzenete bálnanyelven! 🐳",
+                storyImageUrl: "placeholder_day11.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, írtunk neked egy hosszú levelet! 📝 Herold egy nagyon szép rajzot is készített, és Buckó is küldött egy különleges bálnanyelvi üzenetet egy kék pacában. Nagyon jó gyerekek vagyunk, minden rendben, de már hiányzol! Reméljük, hamar megkapod az üzenetünket! 🎀", 
+                    "A sok körmölésben elfáradt a mancsunk. Neked küldünk egy Hidratáló kézmaszkot, hogy pihe-puha legyen a kezed! 🧤"
+                ], 
+                replies: [{u: "Láttam a kék pacát! 🥹", c: "A legszebb üzenet! Szia! 🐋"}, {u: "Mi a Hó-bálna a rajzon?", c: "Herold szerint krumpli, de én azt mondom, művészet! Szia!"}]
+            },
+            // 12. BUCKÓ (Kalandor) - A viharos éjszaka
+            { 
+                id: 12, 
+                char: "bucko", 
+                title: "A viharos éjszaka", 
+                storyPage1: "Éjszaka hatalmas szél támadt. Az ablakok zörögtek, az ágak kopogtattak az üvegen, mintha be akarnának jönni. Hirtelen: CSATT! Egy hatalmas dörgés rázta meg a házat. Buckó, aki általában bátor, most ijedtében be akart bújni az ágy alá. De sajnos az utóbbi napokban túl sok mézeskalácsot evett, így a pocakja beszorult.", 
+                storyPage2: "– Segítség! A pocakom csapdába esett! – kiabálta kétségbeesetten. Herold és Hanna azonnal ugrottak. Egyikük húzta a farkát, másikuk tolta az orrát. – Húzd be a levegőt, Buckó! – vezényelt Hanna. Végül egy nagy 'PLOPP' hanggal kiszabadult. Aznap éjjel mindhárman egy nagy kupacban, egymást ölelve aludtak el a nappali szőnyegén, biztonságban.", 
+                storyImageText: "Nézd, ez a mentőakció! (Kép a beszorult Buckóról!)",
+                storyImageUrl: "placeholder_day12.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Kicsit féltem az égzengéstől, de már bátor vagyok! 🌩️ Képzeld, majdnem beszorultam az ágy alá, de Heroldék igazi hősök voltak és kiszabadítottak! Nagyon örülök, hogy vigyáznak rám! Most már minden csendes, és biztonságban vagyunk. 🐳", 
+                    "Ha te is fáznál, húzd fel ezt a Puha vastag zoknit, és bújj be az ágyba! 🧦"
+                ], 
+                replies: [{u: "Jól vagytok? 😱", c: "Igen! Buckó is! Szia! 💪"}, {u: "Miért bújt Buckó az ágy alá?", c: "Félt a dörgéstől, de most már bátor! Szia! 😉"}]
+            },
+            // 13. HANNA (Rendteremtő) - Gubancok és gömbök
+            { 
+                id: 13, 
+                char: "hanna", 
+                title: "Gubancok és gömbök", 
+                storyPage1: "Elérkezett az idő a díszek ellenőrzésére. Hanna lehozta a padlásról a dobozokat. – Jaj ne! – kiáltott fel, amint kinyitotta az elsőt. A karácsonyi izzósor egyetlen hatalmas, reménytelen gombóccá gabalyodott össze, mintha egy világító spagetti lenne.", 
+                storyPage2: "– Én megoldom! – ajánlkozott Herold, és bátran belevetette magát a kábelrengetegbe. Tíz perc múlva már ő is bele volt tekeredve, mint egy karácsonyi hernyó. Csak a szeme látszott ki. Végül Hanna szabadította ki őt is és az égősort is. Közben Buckó a gömböket válogatta színek szerint: a kékek voltak a kedvencei, mert a tengerre emlékeztették.", 
+                storyImageText: "Nézd, ez volt Herold a gubancban! 🤣",
+                storyImageUrl: "placeholder_day13.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Jaj Mama, képzeld, az égősor megtámadta Heroldot! 🎄 Úgy nézett ki, mint egy világító múmia a padlón, teljesen belegabalyodott! Szerencsére kiszabadítottam, de a haja eléggé gubancos lett a nagy mentőakcióban. Ne aggódj, az égősort már majdnem kibogoztam, és nemsokára díszítünk! 🎀", 
+                    "Hogy a te hajad ne legyen gubancos, küldünk egy szuper Hajpakolást. Csillogni fogsz! 💇‍♀️"
+                ], 
+                replies: [{u: "Jaj, az a gubanc... 🤦‍♀️", c: "Túlélte! Mint én! Szia! 💪"}, {u: "Herold jól van?", c: "Igen, már nassol valahol! Szia! 😉"}]
+            },
+            // 14. HEROLD (Szeleburdi) - A sós sütemény rejtélye
+            { 
+                id: 14, 
+                char: "herold", 
+                title: "A sós sütemény rejtélye", 
+                storyPage1: "Újra sütésre adták a fejüket. Most mézeskalácsot készítettek, mert annak olyan jó illata van. Hanna nagyon figyelt a receptre. – Liszt, tojás, méz... és cukor! – sorolta, és beleöntött egy nagy bögre fehér port a tésztába. Amikor kisültek a formák, Herold azonnal bekapott egyet, még forrón.", 
+                storyPage2: "De a mosolya hirtelen lefagyott az arcáról. – Pfúj! Ez borzalmas! – köpte ki a falatot. Hanna megkóstolta. – Jaj, ez nem cukor volt, hanem só! Kiderült, hogy Hanna összekeverte a dobozokat! Az egész adag a kukában végezte, de legalább jót nevettek a 'sós-kalácson'. – A sós vizet szeretem, de a sós mézeskalácsot még én sem! – állapította meg Buckó.", 
+                storyImageText: "Nézd, ezt kaptuk só helyett! 🤢 (Kép a sós mézeskalácsról)",
+                storyImageUrl: "placeholder_day14.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Soha ne egyél Hanna mai sütijéből! 🤢 SÓS volt! Azt hittem, menten elájulok, akkora csalódás volt! Most gyorsan kell szereznem valami édeset, hogy elmúljon a sós utóíz! Találtunk egy kis csokit, de az eltűnt cukrot is megtaláltuk! Kár, hogy a süti kukába került! 🦛", 
+                    "Megtaláltuk a cukrot, ami a sütiből kimaradt! Bocsánatképpen itt egy Cukros testradír. Ezzel édesebb lesz a napod! 🍬"
+                ], 
+                replies: [{u: "Ó, a só... 🙈", c: "Túl sok volt a tenger íz! Szia! 😜"}, {u: "Még mindig éhes Herold?", c: "Most már igen! Szaladok sütit keresni! Szia!"}]
+            },
+            // 15. HANNA (Kreatív) - A tökéletes figurák
+            { 
+                id: 15, 
+                char: "hanna", 
+                title: "A tökéletes figurák", 
+                storyPage1: "A sós katasztrófa után újra nekiláttak. Most Herold háromszor is megkóstolta a fehér port: Cukor! Mehet bele! Nagyon kreatívak voltak a formázásnál. Hanna csinált egy Mama-figurát és egy Papa-figurát, cukormáz-mosollyal és kis cukorgyöngy szemekkel.", 
+                storyPage2: "Herold egy pufók vizilovat formázott (saját magáról), aminek mazsola volt a köldöke. Buckó pedig egy bálnát gyúrt, de mivel a tészta sütés közben megnőtt, a bálna akkora lett, mint egy kisebb kenyér. – Ezt el kell tennünk nekik! – mondták, és a legszebbeket egy fémdobozba zárták, hogy frissek maradjanak a szülők érkezéséig.", 
+                storyImageText: "Nézd, a te formád tökéletes lett! 🥰 (Kép a Mama-kekszedről)",
+                storyImageUrl: "placeholder_day15.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, a második adag sütés már tökéletesen sikerült, sikerült a sós-cukor katasztrófát elkerülni! 🍪 Csináltunk egy rólad formázott kekszet is, ami nagyon hasonlít rád, és persze egy másikat Heroldról mazsolaköldökkel. Elzártuk a legszebbeket egy dobozba, hogy Karácsonykor frissek legyenek! 🎀", 
+                    "Mi a tésztát gyúrtuk formára, te pedig kényeztesd az arcodat ezzel a Gua Sha kővel. Simítsd ki vele a ráncokat! 🗿"
+                ], 
+                replies: [{u: "Jól sikerült a viziló? 🥰", c: "A legszebb a mazsolaköldökkel! Szia! 😉"}, {u: "Megtetted, hogy elzártad a sütiket?", c: "Igen! Biztonságban vannak! Szia!"}]
+            },
+            // 16. BUCKÓ (Kalandor) - Mozi a nappaliban
+            { 
+                id: 16, 
+                char: "bucko", 
+                title: "Mozi a nappaliban", 
+                storyPage1: "Kint sötét volt és hideg, de bent igazi mozi-hangulat uralkodott. Építettek egy hatalmas erődöt párnákból és takarókból a TV előtt. Ez volt a VIP páholy. Kukoricát pattogtattak, ami nagyon vicces volt, mert Herold elfelejtette rátenni a fedőt a lábasra. A pattogatott kukorica szanaszét repült a konyhában, mint egy ágyúból lőtték volna! Buckó a levegőben kapdosta el a szemeket.", 
+                storyPage2: "Betették a 'Reszkessetek, betörőket!'-et. Herold a hasát fogta a nevetéstől, amikor a betörők elestek. Buckó viszont a megható részeknél sírva fakadt. – Olyan szép, amikor a végén mindenki találkozik! – szipogta, és egy papírzsebkendővel törölgette a fújónyílását.", 
+                storyImageText: "Nézd, építettünk egy VIP párnaerődöt! 🎬",
+                storyImageUrl: "placeholder_day16.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, megnéztük a Reszkessetek, betörőket a párnaerődben! 🎬 Hatalmas volt a móka, még a pattogatott kukorica is szétrepült a konyhában, mint egy ágyú! Kicsit sírtam a végén, mert nagyon megható volt! Szerintem neked is meg kell nézned a kedvenc filmedet, de előtte pihenj egy kicsit! 🐳", 
+                    "Indítsd el te is a kedvenc filmedet! Pont addig tart, amíg ez a Lábmaszk pihenteti a lábadat. Jó mozizást! 🦶"
+                ], 
+                replies: [{u: "A kukorica a plafonon is van? 😅", c: "Picit! De mindent megeszünk! Szia! 😜"}, {u: "Melyik filmet néztétek?", c: "A Reszkessetek, betörőket! Király! Szia!"}]
+            },
+            // 17. HEROLD (Szeleburdi) - A ferde fenyőfa
+            { 
+                id: 17, 
+                char: "herold", 
+                title: "A ferde fenyőfa", 
+                storyPage1: "Reggel csengettek. Megérkezett a fenyőfa! – Hű, de magas! – ámult el Hanna, alig látta a tetejét. Nagy nehezen bevonszolták a nappaliba. Herold tartotta a törzset, Hanna csavarta a talpat. – Még egy kicsit balra... most jobbra... most dől! VIGYÁZZ!", 
+                storyPage2: "A fa elindult, és puff! Egyenesen a fotelre dőlt, maga alá temetve egy díszpárnát. Felállították újra. Kicsit ferde volt, kicsit kopasz volt az egyik oldala, és kicsit gyantás lett tőle a szőnyeg. – Szerintem tökéletes – mondta Buckó, és szeretettel nézett a fára. – Olyan, mint mi. Kicsit szeleburdi, de a mienk!", 
+                storyImageText: "Nézd, ez a mi ferde, de gyönyörű fánk! 🌲",
+                storyImageUrl: "placeholder_day17.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, megjött a fa! 🌲 Képzeld, kicsit dülöngélt, mint én korcsolyázás közben, és rá is borult a fotelre, de most már stabil! Buckó szerint tökéletes! Egy kicsit gyantás lett a szőnyeg, de nem baj, majd Buckó letakarítja a szájával! Remélem, neked is illatos a napod! 🦛", 
+                    "A fánk zöld és illatos, ez a Zöld agyagos maszkis pont ilyen! Kend fel, és töltődj fel! 🌿"
+                ], 
+                replies: [{u: "Ferde fa, szép fa! 😅", c: "Pontosan! A mienk! Szia! 💙"}, {u: "Buckó, miért mondtad, hogy tökéletes?", c: "Mert az a legfontosabb, hogy a mienk! Szia!"}]
+            },
+            // 18. HANNA (Gondoskodó) - Csillagszóró és girland
+            { 
+                id: 18, 
+                char: "hanna", 
+                title: "Csillagszóró és girland", 
+                storyPage1: "A mai nap a fa díszítéséről szólt. Felkerültek a tegnap megmentett gömbök. Hanna gyönyörű masnikat kötött az ágakra. Herold a szaloncukrokat aggatta fel, de valami rejtélyes oknál fogva a szaloncukrok fele üres volt, mire a fára került. Csak az üres, csillogó papírok lógtak.", 
+                storyPage2: "– Herold, miért van csoki a szádban? – kérdezte gyanakvóan Hanna. – Csak ellenőriztem a minőséget! Nem tehetünk fel romlott csokit! – védekezett teli szájjal Herold. A csúcsdísz felrakása volt a legnehezebb. Herold felmászott egy székre, Buckó megtolta az orrával a fenekét, Hanna pedig navigált. Sikerült! A csillag ferdén, de büszkén ragyogott a fa tetején.", 
+                storyImageText: "Nézd, a csúcsdísz a helyén! ✨",
+                storyImageUrl: "placeholder_day18.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, elkészült a karácsonyfa! 🎀 Herold szerint a szaloncukrok fele 'romlott' volt, de én tudom, hogy csak megegyte! 😂 Ne aggódj, a csúcsdísz felkerült, csapatmunkával, és gyönyörűen csillog! Remélem, a tied is csillog már, és lassan átengeded magad az ünnepi hangulatnak! 🎀", 
+                    "A karácsonyfa már csillog-villog, most a mosolyodon a sor! Ez az Ajakolaj úgy ragyog majd a szádon, mint a legszebb dísz. 💄"
+                ], 
+                replies: [{u: "Herold, a 'minőségellenőr'! 😅", c: "Tudod, a biztonság a legfontosabb! Szia! 😉"}, {u: "Ügyesek voltatok a csúcsdísszel!", c: "Buckó nélkül nem ment volna! Szia!"}]
+            },
+            // 19. HEROLD (Szeleburdi) - A váratlan vendég
+            { 
+                id: 19, 
+                char: "herold", 
+                title: "A váratlan vendég", 
+                storyPage1: "Miközben teáztak, furcsa kaparászást hallottak a kémény felől. – Jön a Jézuska? – suttogta Herold tágra nyílt szemekkel. De nem a Jézuska volt, hanem egy kormos, kicsi veréb, aki véletlenül beesett a kandallóba!", 
+                storyPage2: "Szegény madárka ijedten repkedett körbe-körbe, kormot szórva a frissen felmosott padlóra és a fehér függönyre. Hanna gyorsan kinyitotta az ablakot. Buckó kedvesen, halkan csipogott neki (bálnanyelven), hogy megnyugtassa. Végül a kismadár kitalált a szabadba. – Nevezzük el Kormosnak! – mondta Herold. – Remélem, visszajön karácsonyra, de legközelebb inkább az ajtón keresztül.", 
+                storyImageText: "Nézd, Kormos már elrepült! 🐦 (Kép a kormos kéményről)",
+                storyImageUrl: "placeholder_day19.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama! Volt egy váratlan vendégünk, egy kormos veréb leesett a kéményen! 🐦 Kicsit kormos lett a szőnyeg meg a függöny is, de Hanna kiengedte, és már jól van! Szerencsére Buckó nem ijedt meg tőle! Mi most Hanna után takarítunk egy kicsit. Hiányzol! 🦛", 
+                    "A madárkáról jutott eszünkbe ez a Fekete maszk. Ne ijedj meg a színétől, te szebb leszel tőle! 🖤"
+                ], 
+                replies: [{u: "Szegény veréb! 😥", c: "De már szabad! Szia! 😜"}, {u: "Kimosod a függönyt?", c: "Hanna csinálja! Én csak nézem! Szia!"}]
+            },
+            // 20. HANNA (Rendteremtő) - Titkos műhely
+            { 
+                id: 20, 
+                char: "hanna", 
+                title: "Titkos műhely", 
+                storyPage1: "A szülőknek is kell ajándék! De miből? Zsebpénzük már nem maradt, így a saját tehetségüket használták. Herold, aki imádott festeni, készített egy portrét a családról. Igaz, Papának zöld lett a feje, mert elfogyott a bőrszínű festék, de a szeretet volt a lényeg.", 
+                storyPage2: "Hanna egy gyönyörű nyakláncot fűzött Mamának száraztésztából, amit aranyra festett csillámporral. Buckó pedig írt egy dalt. – Ezt majd eléneklem nekik, amikor belépnek! – mondta. A dal címe ez volt: 'A legszebb óceán a családom szeretete'. Herold kicsit megkönnyezte a próbát.", 
+                storyImageText: "Nézd, egy kis kép a titkos műhelyből! 🤫",
+                storyImageUrl: "placeholder_day20.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Titkos projektben vagyunk, Mama! 🤫 Nem mondhatjuk el pontosan, mit csinálunk, de készülnek a legszebb ajándékok Papa meg a te számodra! Herold egy kicsit elszaladt a festékkel, de a szívünk benne van! Kérlek, ne is kérdezz semmit, Karácsonykor meglátod! Nagyon izgatott vagyok! 🎀", 
+                    "Mi festettünk, de Apa segített kinyomtatni a legszebb emléket: egy Közös fotót rólunk! Tedd ki az asztalra! ❤️"
+                ], 
+                replies: [{u: "Zöld fejű Papa! 🤣", c: "Ne nevess! Művészi szabadság! Szia! 😜"}, {u: "Énekelj nekem is egy keveset!", c: "Majd karácsonykor! Tartsuk a meglepetést! Szia!"}]
+            },
+            // 21. HEROLD (Szeleburdi) - A nagy szánkó-futam
+            { 
+                id: 21, 
+                char: "herold", 
+                title: "A nagy szánkó-futam", 
+                storyPage1: "A domboldalon vastag hó állt, a nap hét ágra sütött. – Versenyezzünk! – kiáltotta Herold. De csak egy nagy szánkójuk volt. Így hát felültek rá mindhárman: elöl a kis bálna (ő volt az áramvonalas orr), középen Hanna, hátul Herold, a súly. – 3, 2, 1, RAJT!", 
+                storyPage2: "A szánkó száguldott lefelé, gyorsabban, mint egy rakéta. – FÉKEZZ! FÉKEZZ! – visította Hanna. – NEM TUDOK! – ordította Herold. Belecsapódtak egy hatalmas hóbuckába a domb alján. Hó borította be őket tetőtől talpig. Amikor kiásták magukat, úgy néztek ki, mint három dundi hóember. Soha ilyen jót nem nevettek még!", 
+                storyImageText: "Nézd, így lett belőlem hóember! 🤣",
+                storyImageUrl: "placeholder_day21.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, SZÁNKÓZTUNK!!! 🛷 Akkorát estünk a domb alján, hogy hóember lett belőlünk! De nagyon vicces volt! Hanna persze sikított, de Buckó is nevetett! Olyan boldog vagyok, hogy már alig várom, hogy hazaérjetek! 🦛", 
+                    "Hú, de süvít a szél kint! Itt egy Ajakápoló, kend be a szád, nehogy kicserepesedjen a nagy nevetésben! 💋"
+                ], 
+                replies: [{u: "Nagyon vigyázzatok magatokra! 😱", c: "Már bent vagyunk! És nevetünk! Szia! 😜"}, {u: "Hóember! Tényleg!", c: "Én voltam a legdundibb! Szia!"}]
+            },
+            // 22. HANNA (Gondoskodó) - Az utolsó simítások
+            { 
+                id: 22, 
+                char: "hanna", 
+                title: "Az utolsó simítások", 
+                storyPage1: "Már csak kettőt kell aludni! A feszültség szinte tapintható volt a házban. Ma mindent újra ellenőriztek, mintha egy fontos vizsgára készülnének. Tiszta a lakás? Igen (a kormos foltokat eltüntették). Megvannak a sütik? Igen (a doboz biztonságban a polc tetején, ahol Herold nem éri el). Megvannak az ajándékok? Igen, szépen becsomagolva a fa alatt.", 
+                storyPage2: "Herold még a fogát is háromszor mosta meg este, és a legszebb, csíkos pizsamáját készítette ki. – Úgy izgulok, hogy remeg a pocakom! – mondta az ágyban. – Az enyém is! – tette hozzá Buckó. – Pedig nekem vastag zsírrétegem van! Nézték a villogó fényeket, és lassan, nagyon lassan elnyomta őket az álom.", 
+                storyImageText: "Nézd, már mindent leellenőriztem! 👌",
+                storyImageUrl: "placeholder_day22.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, már csak kettőt kell aludni, elképesztő! 😱 Minden készen áll, a lakás tiszta, a fa gyönyörű, és Herold is a legszebb pizsamájában várja a reggelt. Én is nagyon izgulok, de a gondolat, hogy holnap itt lesztek, mindent felülír! Te is pihenj rá a holnapra, hogy a legszebb lehess! 🎀", 
+                    "Herold fogat mosott, mi takarítottunk. Itt egy Szépítő ampulla, hogy holnap te legyél a legszebb az ünnepen! ✨"
+                ], 
+                replies: [{u: "Ti vagytok a legügyesebbek! 🥰", c: "Tudom! De csak érted! Szia! 😊"}, {u: "Megvan a süti?", c: "Igen! Herold nem érte el! Szia!"}]
+            },
+            // 23. BUCKÓ (Kalandor) - Szenteste előtti éjjel
+            { 
+                id: 23, 
+                char: "bucko", 
+                title: "Szenteste előtti éjjel", 
+                storyPage1: "Minden kész volt. A fa fényei égtek, a házban fahéj, fenyő és szeretet illata terjengett. Nem tudtak elaludni a hálószobában. Túl nagy volt a csend. – Menjünk le! – javasolta Hanna. Levitték a hálózsákokat a nappaliba, és mindhárman a karácsonyfa alá feküdtek.", 
+                storyPage2: "– Szerintetek sokat nőttek a szülők, amíg nem láttuk őket? – kérdezte Herold álmosan. – A felnőttek már nem nőnek – suttogta Hanna, és megsimogatta a fejét. – De a szeretetük biztosan nőtt, mert annyira hiányzunk nekik. – Holnap ilyenkor már itt lesznek... – sóhajtott boldogan Buckó. Nézték a villogó fényeket, és lassan, nagyon lassan elnyomta őket az álom.", 
+                storyImageText: "Nézd, a fa alatt alszunk! ⛺️",
+                storyImageUrl: "placeholder_day23.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "Mama, ma a fa alatt alszunk! ⛺️ Így biztosan nem maradjunk le a pillanatról, amikor megérkeztek! Minden nagyon szép és illatos! Hanna szerint a szeretetetek nőtt, és én ezzel teljesen egyetértek! Már alig várjuk, hogy holnap ölelhessünk! 😭🐳", 
+                    "Ma este gyújtsd meg ezt a Csillagszórót, és gondolj ránk! Már alig várjuk a holnapot... ⭐"
+                ], 
+                replies: [{u: "Nagyon szeretlek titeket! 💖", c: "Mi is téged, Mama! Szia! 😭"}, {u: "Nézzétek a fényeimet!", c: "Nézzük! Gyönyörű! Szia!"}]
+            },
+            // 24. HEROLD (Szeleburdi) - A CSODA
+            { 
+                id: 24, 
+                char: "herold", 
+                title: "A CSODA", 
+                storyPage1: "Reggel csörgött a kulcs a zárban. A három jóbarát egyszerre pattant fel, mintha rugó lett volna alattuk. Az ajtó kinyílt, és ott álltak! Papa és Mama, kipirulva a hidegtől, teli karral csomagokkal. – MEGJÖTTEK! – ordította Herold, és akkorát ugrott örömében, hogy majdnem fellökte a fogast.", 
+                storyPage2: "A szülők ledobták a táskákat, és a földre térdeltek. Herold, Hanna és Buckó egyszerre vetették magukat a nyakukba. Volt ott sírás, nevetés, ölelés és puszihegyek. – Ti voltatok a legügyesebb házőrzők a világon! – mondta Mama, és megpuszilta Buckó orrát. Ez volt a legszebb karácsony, mert a legnagyobb ajándék nem a fa alatt volt, hanem az ölelésükben: a család újra együtt volt.", 
+                storyImageText: "Nézd, mekkorát ugrunk örömünkben! 🤣",
+                storyImageUrl: "placeholder_day24.jpg", // PLÉSZHÓLDER: Cseréld le a tényleges URL-re!
+                msgs: [
+                    "MAMA, PAPA! ITTHON VAGYTOK!!! Ez a legjobb karácsony a világon! 🎄 Akkorát ugrottam örömömben, hogy a fogas is majdnem eldőlt! Gyere gyorsan, öleljük meg egymást, hiányoztál a legjobban! Gyertek gyorsan a fa alá, minden készen áll! ❤️🦛", 
+                    "És most... nyisd ki a Fő Ajándékot! Ezt neked őriztük! Boldog Karácsonyt! 🎁"
+                ], 
+                replies: [{u: "BOLDOG KARÁCSONYT! 🎁", c: "❤️❤️❤️"}, {u: "Megvan a süti?", c: "Most már szabad! Gyere gyorsan! 🍪"}]
+            },
+        ];
 
         // --- ÁLLAPOTOK (GLOBALS) ---
         let state = {
             apiKey: localStorage.getItem('geminiKey') || "",
             unlockedDays: JSON.parse(localStorage.getItem('openedDays') || '[]'),
             chatHistory: JSON.parse(localStorage.getItem('chatHistory3') || '{}'),
-            currentDayId: null,
+            currentDayId: null, // Az utoljára megnyitott nap ID-je (segít a karakter azonosításában)
             view: 'grid', // 'grid', 'story', 'chatList', 'chatDetail'
             typing: false,
             testMode: false,
-            notifAfterCloseDayId: null, // Új: Ez tárolja a nap ID-t, amit bezárás után értesítünk
+            notifAfterCloseDayId: null, 
+            storyPage: 1, // ÚJ: A történet modal aktuális oldala (1 vagy 2)
         };
 
         // --- SEGÉDFÜGGVÉNYEK ---
 
-        /** Adatok mentése a localStorage-ba */
         function saveState(key, value) {
             if (key === 'unlockedDays') {
                 localStorage.setItem('openedDays', JSON.stringify(value));
@@ -393,13 +812,10 @@
                 localStorage.setItem('geminiKey', value);
                 state.apiKey = value;
             }
-            renderApp(); // Mindig rendereljük újra az állapotváltozás után
+            renderApp(); 
         }
 
-        /** Értesítés hozzáadása */
         function addNotification(name, msg, icon) {
-            const id = Date.now();
-            
             const notifEl = document.createElement('div');
             notifEl.className = 'ios-notification';
             notifEl.innerHTML = `
@@ -417,36 +833,87 @@
 
             ELEMENTS.notificationContainer.appendChild(notifEl);
 
-            // Eltávolítás 5 másodperc múlva
             setTimeout(() => {
                 notifEl.remove();
             }, 5000);
         }
 
-        /** Nézet váltása (DOM manipuláció) */
         function setView(newView, dayId = null) {
+            // Értesítés küldése a story modal bezárása után
             if (state.view === 'story' && newView === 'grid' && state.notifAfterCloseDayId !== null) {
-                // Késleltetett értesítés megjelenítése
                 const day = STORY_DATA.find(d => d.id === state.notifAfterCloseDayId);
                 if (day) {
                     const char = CHARACTERS[day.char];
-                    addNotification(char.name, day.msgs[0], char.icon);
-                    setTimeout(() => addNotification(char.name, day.msgs[1], "🎁"), 3000);
+                    
+                    // 1. Értesítés: Sztori reakció (msgs[0])
+                    setTimeout(() => {
+                         addNotification(char.name, day.msgs[0], char.icon); 
+                    }, 400); 
+
+                    // 2. Értesítés: Kép küldése (msgs[1] bevezető szövege)
+                    const imageNotifText = `${char.name} képet küldött!`;
+                    setTimeout(() => {
+                         addNotification(char.name, imageNotifText, char.icon); 
+                    }, 2500); 
+
+                    // 3. Értesítés: Ajándék (msgs[msgs.length - 1] -> msgs[3])
+                    setTimeout(() => {
+                         addNotification(char.name, day.msgs[day.msgs.length - 1], "🎁"); 
+                    }, 4500); 
                 }
                 state.notifAfterCloseDayId = null;
             }
             
             state.view = newView;
-            state.currentDayId = dayId;
-            renderApp();
+            if (dayId !== null) state.currentDayId = dayId;
+            if (newView === 'story') state.storyPage = 1; // Újra megnyitáskor mindig 1. oldal
+            
+
+            if (newView === 'chatList') {
+                ELEMENTS.chatScreenList.classList.add('active');
+                ELEMENTS.chatScreenDetail.classList.remove('active');
+            } else if (newView === 'chatDetail') {
+                ELEMENTS.chatScreenList.classList.add('active');
+                ELEMENTS.chatScreenDetail.classList.add('active');
+            } else {
+                ELEMENTS.chatScreenList.classList.remove('active');
+                ELEMENTS.chatScreenDetail.classList.remove('active');
+            }
+            
+            renderApp(); 
         }
-        
-        // --- GEMINI API HÍVÁS ---
+
+        function updateStoryModalPages() {
+            const day = STORY_DATA.find(d => d.id === state.currentDayId);
+            if (!day) return;
+
+            // Oldal tartalmának beállítása (HTML-ben p tageket generálunk)
+            ELEMENTS.storyPage1.innerHTML = day.storyPage1.split('\n').map(p => `<p>${p}</p>`).join('');
+            ELEMENTS.storyPage2.innerHTML = day.storyPage2.split('\n').map(p => `<p>${p}</p>`).join('');
+            
+            // Oldalak megjelenítése/elrejtése
+            ELEMENTS.storyPage1.style.display = state.storyPage === 1 ? 'block' : 'none';
+            ELEMENTS.storyPage2.style.display = state.storyPage === 2 ? 'block' : 'none';
+
+            // Navigációs gombok beállítása
+            ELEMENTS.storyPrevBtn.disabled = state.storyPage === 1;
+            ELEMENTS.storyNextBtn.disabled = state.storyPage === 2;
+            
+            ELEMENTS.storyPrevBtn.style.opacity = state.storyPage === 1 ? '0.5' : '1';
+            ELEMENTS.storyNextBtn.style.opacity = state.storyPage === 2 ? '0.5' : '1';
+
+            // Pontok aktivitása
+            ELEMENTS.storyDot1.classList.toggle('active', state.storyPage === 1);
+            ELEMENTS.storyDot2.classList.toggle('active', state.storyPage === 2);
+        }
+
         async function callGemini(userMessage, characterKey, context) {
+            if (!state.apiKey) return "Most tele a szám bejglivel, de egyetértek! 🥯 (Offline mód)";
+            
             const char = CHARACTERS[characterKey];
             const systemPrompt = `You are ${char.name}, a ${char.desc}. You are texting your owner 'Mama'. Style: ${char.style}. Context: ${context}. Reply to: "${userMessage}". Keep it short (max 2 sentences), cute, funny. End with a goodbye reason. Language: Hungarian.`;
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${state.apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.apiKey}`;
             
             const payload = {
                 contents: [{ parts: [{ text: systemPrompt }] }],
@@ -465,77 +932,89 @@
                 }
                 return data.candidates[0].content.parts[0].text;
             } catch (e) {
-                console.error(e);
-                // Visszaállítás offline üzenetre hiba esetén
+                console.error("Gemini hiba:", e);
                 return "Most tele a szám bejglivel, de egyetértek! 🥯 (Offline mód)";
             }
         }
 
-        // --- ESEMÉNYKEZELŐK ---
-
-        /** Nap megnyitása */
         function handleDayClick(day) {
-            const today = new Date().getDate();
-            const isAvailable = state.testMode || day.id <= today;
+            const today = state.testMode ? 31 : new Date().getDate();
+            const isAvailable = day.id <= today;
             
             if (isAvailable) {
                 if (!state.unlockedDays.includes(day.id)) {
-                    // Új nap megnyitása
                     const newUnlocked = [...state.unlockedDays, day.id];
                     saveState('unlockedDays', newUnlocked);
                     
-                    // Kezdeti üzenetek létrehozása
-                    const initialMsgs = day.msgs.map(m => ({ text: m, isMe: false }));
+                    // ÚJ ÜZENET STRUKTÚRA GENERÁLÁSA
+                    const initialMsgs = [];
+                    // 1. Szöveg (Sztori reakció)
+                    initialMsgs.push({ text: day.msgs[0], isMe: false });
+                    
+                    // 2. Kép bevezető (storyImageText)
+                    initialMsgs.push({ text: day.storyImageText, isMe: false, isImageText: true });
+                    
+                    // 3. Kép (Plészhólder)
+                    initialMsgs.push({ text: `<img src="${day.storyImageUrl}" alt="Kép a történetről">`, isMe: false, isImage: true });
+
+                    // 4. Ajándék Szöveg
+                    initialMsgs.push({ text: day.msgs[1], isMe: false });
+                    
                     const newHist = { ...state.chatHistory, [day.id]: { msgs: initialMsgs, seen: false } };
                     saveState('chatHistory', newHist);
                     
-                    // Beállítjuk, hogy ezt a napot értesíteni kell bezárás után
                     state.notifAfterCloseDayId = day.id;
                 }
                 
-                // Mese Modal megjelenítése
                 ELEMENTS.storyTitle.textContent = '📜 ' + day.title;
-                ELEMENTS.storyText.textContent = day.message;
                 setView('story', day.id);
             } else {
                 addNotification("Rendszer", "Még nem szabad! 🤫", "🔒");
             }
         }
         
-        /** Üzenet küldése (AI válasz logikával) */
         async function sendMessage(text) {
-            if (!text.trim() || state.typing || !state.currentDayId) return;
+            const trimmedText = text.trim();
+            if (!trimmedText || state.typing || !state.currentDayId) return;
 
             const dayId = state.currentDayId;
             const day = STORY_DATA.find(d => d.id === dayId);
+            if (!day) return;
+
             let currentHist = state.chatHistory[dayId] || { msgs: [] };
 
-            // 1. Üzenet hozzáadása a historibe (küldő: én)
-            const newMsgs = [...currentHist.msgs, { text, isMe: true }];
-            saveState('chatHistory', { ...state.chatHistory, [dayId]: { ...currentHist, msgs: newMsgs, seen: true } });
-            ELEMENTS.chatInput.value = "";
+            // 1. Saját üzenet hozzáadása
+            const userMessage = { text: trimmedText, isMe: true };
+            const msgsAfterUser = [...currentHist.msgs, userMessage];
+            
+            saveState('chatHistory', { ...state.chatHistory, [dayId]: { ...currentHist, msgs: msgsAfterUser, seen: true } });
+            
+            ELEMENTS.chatInput.value = ""; 
+            ELEMENTS.chatSendCircle.classList.add('disabled');
             
             // 2. Typing állapot beállítása és UI frissítés
             state.typing = true;
             renderChatDetail();
             
             // 3. AI hívás (késleltetve)
-            await new Promise(r => setTimeout(r, 2000));
-            const context = `Mese: ${day.message}. Ajándék: ${day.msgs[1]}`;
-            const response = await callGemini(text, day.char, context);
+            await new Promise(r => setTimeout(r, 1500)); 
+            
+            // Az AI a hosszú sztori reakcióra válaszol
+            const context = `Mese: ${day.storyPage1.substring(0, 75)}... ${day.storyPage2.substring(0, 75)}... Ajándék: ${day.msgs[day.msgs.length - 1]}`;
+            const response = await callGemini(trimmedText, day.char, context);
             
             // 4. Typing állapot kikapcsolása
             state.typing = false;
             
-            // 5. AI válasz hozzáadása (küldő: plüss)
-            const finalMsgs = [...newMsgs, { text: response, isMe: false }];
+            // 5. AI válasz hozzáadása (a legújabb nap history-jához)
+            const finalMsgs = [...msgsAfterUser, { text: response, isMe: false }];
             const finalHist = { ...state.chatHistory, [dayId]: { msgs: finalMsgs, seen: true } };
-            saveState('chatHistory', finalHist); // Mentés és Render
+            
+            saveState('chatHistory', finalHist);
         }
 
         // --- RENDER FÜGGVÉNYEK ---
 
-        /** Létrehoz egy hópihét, beállítja a véletlenszerű stílusokat */
         function createSnowflake() {
             const snowflakeEl = document.createElement('div');
             snowflakeEl.className = 'snowflake';
@@ -543,12 +1022,10 @@
             snowflakeEl.style.animationDuration = (Math.random() * 5 + 3) + 's';
             snowflakeEl.style.width = Math.random() * 4 + 2 + 'px';
             snowflakeEl.style.height = Math.random() * 4 + 2 + 'px';
-            snowflakeEl.style.animationDelay = Math.random() * 5 + 's';
             document.querySelector('.app-screen').appendChild(snowflakeEl);
-            setTimeout(() => snowflakeEl.remove(), (Math.random() * 5 + 8) * 1000); // 8-13 másodperc után eltávolítja
+            setTimeout(() => snowflakeEl.remove(), (Math.random() * 5 + 8) * 1000); 
         }
 
-        /** Kijelzi a visszaszámlálót */
         function updateCountdown() {
             const target = new Date("Dec 24, 2025 18:00:00").getTime();
             const diff = target - new Date().getTime();
@@ -561,12 +1038,13 @@
             }
         }
         
-        /** Kirajzolja a Naptár kártyákat */
         function renderGrid() {
-            ELEMENTS.gridContainer.innerHTML = ''; // Törli az előző tartalmat
+            ELEMENTS.gridContainer.innerHTML = ''; 
+            const today = state.testMode ? 31 : new Date().getDate();
+            
             STORY_DATA.forEach(day => {
                 const isOpen = state.unlockedDays.includes(day.id);
-                const isLocked = day.id > new Date().getDate() && !isOpen && !state.testMode;
+                const isLocked = day.id > today && !isOpen && !state.testMode;
                 
                 const cardEl = document.createElement('div');
                 cardEl.className = `day-card ${isOpen ? 'opened' : ''} ${isLocked ? 'locked' : ''}`;
@@ -584,39 +1062,61 @@
             });
         }
         
-        /** Kirajzolja a Chat Listát */
+        /** Kirajzolja a Chat Listát (Egy bejegyzés/szereplő) */
         function renderChatList() {
             ELEMENTS.chatListBody.innerHTML = '';
             let totalUnread = 0;
             
-            // Csak a kinyitott napok jelennek meg a listában
-            state.unlockedDays.sort((a,b) => b - a).forEach(id => {
-                const day = STORY_DATA.find(d => d.id === id);
-                if (!day) return;
-                
-                const char = CHARACTERS[day.char];
-                const hist = state.chatHistory[id] || { msgs: [] };
-                const lastMsg = hist.msgs[hist.msgs.length-1]?.text || day.msgs[day.msgs.length-1];
-                
-                const isUnread = !hist.seen;
-                if (isUnread) totalUnread++;
+            // Végigmegyünk a CHAT KONTAKTAINKON (Hanna, Herold, Buckó)
+            CHAT_CONTACTS.forEach(contact => {
+                // Keressük az összes olyan napot, amit ez a karakter indított, és ki van nyitva.
+                const charDays = STORY_DATA.filter(d => 
+                    d.char === contact.key && state.unlockedDays.includes(d.id)
+                ).sort((a, b) => b.id - a.id); // Rendezés a legújabb nap szerint
 
+                if (charDays.length === 0) return;
+                
+                let isUnread = false;
+                let lastMsg = 'Nincs üzenet';
+                let latestDayId = charDays[0].id; // Ez a legfrissebb kinyitott nap
+                
+                // Mivel az üzenetek időrendben vannak a chat detailben, itt a legfrissebb nap üzeneteit nézzük meg, hogy mi a legutóbbi
+                const latestHist = state.chatHistory[latestDayId] || { msgs: [] };
+
+                // Olvasatlan állapot ellenőrzése az ÖSSZES napra
+                for (const day of charDays) {
+                    const hist = state.chatHistory[day.id] || { msgs: [] };
+                    if (!hist.seen) {
+                        isUnread = true;
+                        totalUnread++;
+                    }
+                }
+                
+                // Utolsó üzenet meghatározása
+                if (latestHist.msgs.length > 0) {
+                    const last = latestHist.msgs[latestHist.msgs.length - 1];
+                    lastMsg = (last.isMe ? 'Én: ' : '') + last.text;
+                } else if (charDays[0].msgs.length > 0) {
+                    // Ha nincs interakció, a kezdeti üzenetet vesszük. Az első hosszú üzenet
+                    lastMsg = charDays[0].msgs[0]; 
+                }
+                
                 const listItem = document.createElement('div');
-                listItem.onclick = () => setView('chatDetail', id);
+                // Kattintásra a legfrissebb nap ID-jét adjuk át, ami alapján a renderChatDetail azonosítja a karaktert
+                listItem.onclick = () => setView('chatDetail', latestDayId); 
                 listItem.style.cssText = 'display:flex; gap:15px; padding:15px; border-bottom:1px solid #222; cursor:pointer;';
                 
                 listItem.innerHTML = `
-                    <div style="font-size:30px;">${char.icon}</div>
+                    <div style="font-size:30px;">${contact.icon}</div>
                     <div style="flex:1;">
-                        <div style="display:flex; justify-content:space-between;"><span style="font-weight:bold; color:${isUnread ? 'white' : '#666'};">${char.name}</span><span style="color:${isUnread ? 'white' : '#666'}; font-size:14px;">Ma</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span style="font-weight:bold; color:white;">${contact.name}</span><span style="color:#666; font-size:14px;">Ma</span></div>
                         <div style="color:${isUnread ? 'white' : '#888'}; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:250px; font-weight:${isUnread ? 'bold' : 'normal'};">${lastMsg}</div>
                     </div>
-                    ${isUnread ? '<div style="width:10px; height:10px; border-radius:50%; background:#007AFF; align-self:center;"></div>' : ''}
+                    ${isUnread ? '<div style="width:10px; height:10px; border-radius:50%; background:#007AFF; alignSelf:center;"></div>' : ''}
                 `;
                 ELEMENTS.chatListBody.appendChild(listItem);
             });
             
-            // Jelvény frissítése
             ELEMENTS.unreadBadge.textContent = totalUnread;
             ELEMENTS.unreadBadge.style.display = totalUnread > 0 ? 'flex' : 'none';
         }
@@ -626,35 +1126,74 @@
             const dayId = state.currentDayId;
             if (!dayId) return;
 
-            const day = STORY_DATA.find(d => d.id === dayId);
-            if (!day) return;
+            const selectedDay = STORY_DATA.find(d => d.id === dayId);
+            if (!selectedDay) return;
 
-            const char = CHARACTERS[day.char];
-            const hist = state.chatHistory[dayId] || { msgs: [] };
-            
+            const char = CHARACTERS[selectedDay.char];
+
+            // ÖSSZEFŰZÉS: Megkeressük az összes kinyitott napot, amit EZ a karakter indított
+            const allCharDays = STORY_DATA
+                .filter(d => d.char === selectedDay.char && state.unlockedDays.includes(d.id))
+                .sort((a, b) => a.id - b.id); // Időrendben, a legrégebbitől az újabb felé
+
+            let allMessages = [];
+            let shouldMarkAsSeen = false;
+
+            for (const day of allCharDays) {
+                const hist = state.chatHistory[day.id] || { msgs: [] };
+                
+                // Rendszerüzenet (nap címe)
+                allMessages.push({ 
+                    text: `iMessage • ${day.title}`, 
+                    isSystem: true 
+                });
+
+                // Hozzáadjuk a nap üzeneteit
+                allMessages = allMessages.concat(hist.msgs);
+
+                // Ha az adott nap olvasatlan, beállítjuk a mentéshez
+                if (!hist.seen) {
+                    shouldMarkAsSeen = true;
+                    // IDEIGLENESEN beállítjuk az állapotban, hogy a renderelés azonnal lássa
+                    state.chatHistory[day.id] = { ...hist, seen: true }; 
+                }
+            }
+
             // Fejléc frissítése
             ELEMENTS.chatDetailIcon.textContent = char.icon;
             ELEMENTS.chatDetailName.textContent = char.name;
 
             // Üzenetek kirajzolása
-            ELEMENTS.chatDetailBody.innerHTML = '<div style="text-align:center; color:#666; font-size:11px; margin:10px 0;">iMessage • Ma</div>';
+            ELEMENTS.chatDetailBody.innerHTML = '';
             
-            hist.msgs.forEach(msg => {
+            allMessages.forEach(msg => {
+                if(msg.isSystem) {
+                    ELEMENTS.chatDetailBody.innerHTML += `<div style="text-align:center; color:#666; font-size:11px; margin:10px 0;">${msg.text}</div>`;
+                    return;
+                }
+
                 const msgRow = document.createElement('div');
                 msgRow.className = `message-row ${msg.isMe ? 'me' : 'them'}`;
                 
                 const avatarHtml = !msg.isMe ? `<div class="avatar-small">${char.icon}</div>` : '';
-                const bubbleHtml = `<div class="bubble ${msg.isMe ? 'me' : 'them'}">${msg.text}</div>`;
+                
+                let bubbleClass = 'bubble';
+                if (msg.isImage) bubbleClass += ' image-bubble';
+                
+                const contentHtml = msg.isImage ? msg.text : msg.text;
+                
+                const bubbleHtml = `<div class="bubble ${msg.isMe ? 'me' : 'them'} ${msg.isImage ? 'image-bubble' : ''}">${contentHtml}</div>`;
                 
                 msgRow.innerHTML = msg.isMe ? bubbleHtml : avatarHtml + bubbleHtml;
                 ELEMENTS.chatDetailBody.appendChild(msgRow);
             });
 
             // Typing Indicator
-            const typingEl = document.querySelector('.typing-bubble');
+            const typingEl = ELEMENTS.chatDetailBody.querySelector('.typing-indicator-row');
+            
             if (state.typing && !typingEl) {
                 const typingRow = document.createElement('div');
-                typingRow.className = 'message-row them';
+                typingRow.className = 'message-row them typing-indicator-row'; 
                 typingRow.innerHTML = `
                     <div class="avatar-small">${char.icon}</div>
                     <div class="typing-bubble">
@@ -662,18 +1201,20 @@
                     </div>`;
                 ELEMENTS.chatDetailBody.appendChild(typingRow);
             } else if (!state.typing && typingEl) {
-                typingEl.parentNode.remove();
+                 typingEl.remove();
             }
 
-            // Scroll az aljára
+            // Scroll az aljára (FLUIDITÁS)
             ELEMENTS.chatDetailBody.scrollTop = ELEMENTS.chatDetailBody.scrollHeight;
             
-            // Gyorsválasz csipek
-            const hasSentMessage = hist.msgs.some(m => m.isMe);
-            if (!hasSentMessage && day.replies && day.replies.length > 0) {
+            // Gyorsválasz csipek (a legutolsó nap üzenetei alatt)
+            const latestHist = state.chatHistory[selectedDay.id] || { msgs: [] };
+            const hasSentMessageToLatestDay = latestHist.msgs.some(m => m.isMe);
+            
+            if (!hasSentMessageToLatestDay && selectedDay.replies && selectedDay.replies.length > 0) {
                 ELEMENTS.replyChips.style.display = 'flex';
                 ELEMENTS.replyChips.innerHTML = '';
-                day.replies.forEach(reply => {
+                selectedDay.replies.forEach(reply => {
                     const chip = document.createElement('div');
                     chip.className = 'chip';
                     chip.textContent = reply.u;
@@ -684,52 +1225,51 @@
                 ELEMENTS.replyChips.style.display = 'none';
             }
 
-            // Megjelölés olvasottként
-            if (!hist.seen) {
-                saveState('chatHistory', { ...state.chatHistory, [dayId]: { ...hist, seen: true } });
+            // Ha olvasatlan volt bármi, mentjük a state-et (frissíti a badge-et)
+            if (shouldMarkAsSeen) {
+                saveState('chatHistory', state.chatHistory); 
             }
         }
         
-        /** A fő renderelő függvény */
         function renderApp() {
-            // Fő nézetváltás
-            ELEMENTS.gridView.style.display = state.view === 'grid' ? 'flex' : 'none';
-            ELEMENTS.storyModal.classList.toggle('active', state.view === 'story');
-            ELEMENTS.chatScreenList.classList.toggle('list-active', state.view === 'chatList');
-            ELEMENTS.chatScreenDetail.style.display = state.view === 'chatDetail' ? 'flex' : 'none';
-            
-            // Tab aktív állapot
-            ELEMENTS.tabGrid.classList.toggle('active', state.view === 'grid');
-            ELEMENTS.tabChat.classList.toggle('active', state.view === 'chatList' || state.view === 'chatDetail');
-
-            // API Modal ellenőrzés
             ELEMENTS.apiModal.style.display = state.apiKey ? 'none' : 'flex';
             if (!state.apiKey) return;
             
-            // Képernyő specifikus renderelés
+            ELEMENTS.gridView.style.display = state.view === 'grid' ? 'flex' : 'none';
+            ELEMENTS.storyModal.classList.toggle('active', state.view === 'story');
+            
+            ELEMENTS.tabGrid.classList.toggle('active', state.view === 'grid');
+            ELEMENTS.tabChat.classList.toggle('active', state.view === 'chatList' || state.view === 'chatDetail');
+
+            ELEMENTS.chatScreenList.classList.toggle('active', state.view === 'chatList' || state.view === 'chatDetail');
+            ELEMENTS.chatScreenDetail.classList.toggle('active', state.view === 'chatDetail');
+
             if (state.view === 'grid') {
                 renderGrid();
-                renderChatList(); // Frissíti a badge-et
+                renderChatList(); 
+            } else if (state.view === 'story') {
+                updateStoryModalPages();
             } else if (state.view === 'chatList') {
                 renderChatList();
             } else if (state.view === 'chatDetail') {
                 renderChatList();
                 renderChatDetail();
             }
+            
+            // Küldő gomb állapot frissítése
+            const hasText = ELEMENTS.chatInput.value.trim().length > 0;
+            ELEMENTS.chatSendCircle.classList.toggle('disabled', !hasText || state.typing);
         }
 
         // --- INICIALIZÁCIÓ ÉS ESEMÉNY BEÁLLÍTÁSOK ---
         
-        // Hóesés
         for(let i=0; i<40; i++) {
             createSnowflake();
         }
 
-        // Időzítők
         updateCountdown();
         const countdownInterval = setInterval(updateCountdown, 1000);
 
-        // API gomb esemény
         ELEMENTS.apiSaveBtn.onclick = () => {
             const key = ELEMENTS.apiInput.value.trim();
             if(key.length > 10) {
@@ -741,31 +1281,39 @@
             }
         };
 
-        // Tab gombok
         ELEMENTS.tabGrid.onclick = () => setView('grid');
         ELEMENTS.tabChat.onclick = () => setView('chatList');
         
-        // Modal gombok
         ELEMENTS.storyModal.onclick = (e) => {
             if (e.target.id === 'story-modal') {
                 setView('grid');
             }
         };
-        ELEMENTS.storyChatBtn.onclick = () => {
-            // Bezárás (késleltetett értesítés kiváltása)
+
+        ELEMENTS.storyCloseBtn.onclick = () => {
             setView('grid'); 
-            // Váltás chatre kis késleltetéssel az animáció miatt
-            setTimeout(() => setView('chatDetail', state.currentDayId), 300);
         };
         
-        // Chat detail navigáció
-        document.getElementById('chat-list-close-btn').onclick = () => setView('grid');
-        document.getElementById('chat-detail-back-btn').onclick = () => setView('chatList');
+        // Oldalváltás kezelése
+        ELEMENTS.storyPrevBtn.onclick = () => {
+            if (state.storyPage > 1) {
+                state.storyPage--;
+                renderApp();
+            }
+        };
+        ELEMENTS.storyNextBtn.onclick = () => {
+            if (state.storyPage < 2) {
+                state.storyPage++;
+                renderApp();
+            }
+        };
         
-        // Chat bevitel/küldés
+        document.getElementById('chat-list-close-btn').onclick = () => setView('grid');
+        document.getElementById('chat-detail-back-btn').onclick = () => setView('chatList', state.currentDayId);
+        
         ELEMENTS.chatInput.oninput = () => {
             const hasText = ELEMENTS.chatInput.value.trim().length > 0;
-            ELEMENTS.chatSendCircle.classList.toggle('disabled', !hasText);
+            ELEMENTS.chatSendCircle.classList.toggle('disabled', !hasText || state.typing);
         };
         ELEMENTS.chatSendCircle.onclick = () => {
             sendMessage(ELEMENTS.chatInput.value);
@@ -776,21 +1324,18 @@
             }
         };
         
-        // Simogatás (Petting)
         document.getElementById('chat-detail-avatar-header').onclick = () => {
             if (navigator.vibrate) navigator.vibrate(50);
             const day = STORY_DATA.find(d => d.id === state.currentDayId);
             if (day) addNotification(CHARACTERS[day.char].name, "Hú, de jólesett! ❤️", "🥰");
         };
 
-        // Teszt mód
         ELEMENTS.testBtn.onclick = () => {
             state.testMode = !state.testMode;
             addNotification("Rendszer", `Teszt Mód: ${state.testMode ? 'BE' : 'KI'}`, "⚙️");
             renderApp();
         }
 
-        // Első futtatás
         window.onload = renderApp;
     </script>
 </body>
