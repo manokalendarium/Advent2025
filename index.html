@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mama Kalendáriuma 2025</title>
     
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            document.body.innerHTML = `<div style="color:red; padding:20px; background:black;">
+                <h2>Hiba történt! :(</h2>
+                <p>${message}</p>
+                <p>Sor: ${lineno}</p>
+                <button onclick="localStorage.clear(); location.reload();" style="padding:10px; font-size:20px;">VÉSZHELYZETI RESET (Kattints ide)</button>
+            </div>`;
+        };
+    </script>
+
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -13,7 +24,7 @@
     
     <style>
         :root { --accent: #66ccff; --text-primary: #ffffff; --text-secondary: rgba(255, 255, 255, 0.7); --luxury-red: #80001a; --glass: rgba(20, 20, 30, 0.6); --glass-border: rgba(255, 255, 255, 0.15); --msg-me: #007aff; --msg-them: rgba(255, 255, 255, 0.1); }
-        body { margin: 0; font-family: 'Nunito', sans-serif; background: #050515; color: white; overflow: hidden; height: 100vh; }
+        body { margin: 0; font-family: 'Nunito', sans-serif; background: #050515; color: white; overflow: hidden; height: 100vh; width: 100vw; }
         .aurora-bg { position: absolute; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: radial-gradient(circle at 50% 100%, #1a0b2e, #000); }
         .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; animation: float 10s infinite alternate; }
         @keyframes float { from { transform: translate(0,0); } to { transform: translate(30px, 50px); } }
@@ -53,7 +64,7 @@
         .msg { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.4; position: relative; word-wrap: break-word; }
         .msg.them { background: var(--msg-them); color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
         .msg.me { background: var(--msg-me); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .msg.error { background: #550000; border: 1px solid red; color: #ffcccc; align-self: center; font-family: monospace; font-size: 12px; width: 90%; }
+        .msg.error { background: #550000; border: 1px solid red; color: #ffcccc; }
         .chat-input-area { padding: 10px 15px; background: rgba(30,30,30,0.9); border-top: 1px solid #333; display: flex; gap: 10px; align-items: center; }
         .chat-input { flex-grow: 1; background: #333; border: none; color: white; padding: 10px 15px; border-radius: 20px; font-size: 16px; outline: none; }
         .send-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--accent); }
@@ -73,25 +84,31 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useLayoutEffect } = React;
 
-        // ⚠️ API KULCS (Ellenőrizd, hogy nincs-e felesleges szóköz!)
+        // ⚠️ API KULCS
         const API_KEY = "AIzaSyBSk3j5AAD4Gwge3pe5IUay8wQ5jqyFyPc";
 
+        // --- ADATOK ---
         const characters = {
             hanna: { name: "Hanna", icon: "🎀", desc: "rózsaszín, gondoskodó lány víziló", style: "Kedves, anyáskodó, sok emojit használ." },
             herold: { name: "Herold", icon: "🦛", desc: "lila, pufók és falánk víziló", style: "Vicces, éhes, szeleburdi." },
             bucko: { name: "Buckó", icon: "🐳", desc: "kék, bátor kis bálna", style: "Bátor, lelkes, vizet emleget." }
         };
 
-        // --- ADATOK (A rövidített példa, élesben a teljes lista kell) ---
         const storyData = [
-            { id: 1, title: "A nagy elutazás", message: "A reggel ködösen indult... Papa és Mama elindultak. Herold cocó az ablakban állt. 'Ne itasd az egereket!' – mondta Hanna. Buckó tésztaszűrővel a fején tisztelgett.", char: "hanna", msgs: ["Szia Mama! ❤️ Ne aggódj értünk, nagyon ügyesek vagyunk itt otthon! Herold már nem is sír. Vigyázz magadra! Puszilunk!", "Készítettem neked egy kis csomagot az útra. Használd ezt a Mini kézkrémet, hogy puha maradjon a kezed!"], replies: [{u: "Köszönöm, Hanna! ❤️", c: "Szívesen! Most megyek, segítek Heroldnak kipakolni. Szia! 👋"}, {u: "Ti is vigyázzatok!", c: "Ígérjük! Na szaladok, mert Buckó beszorult. Szia!"}] },
-            // ... (többi nap)
+            { id: 1, title: "A nagy elutazás", message: "A reggel ködösen indult... Papa és Mama elindultak. Herold cocó az ablakban állt. 'Ne itasd az egereket!' – mondta Hanna. Buckó tésztaszűrővel a fején tisztelgett.", char: "hanna", msgs: ["Szia Mama! ❤️ Ne aggódj értünk, nagyon ügyesek vagyunk itt otthon! Herold már nem is sír. Vigyázz magadra! Puszilunk!", "Készítettem neked egy kis csomagot az útra. Használd ezt a Mini kézkrémet, hogy puha maradjon a kezed!"] },
+            { id: 2, title: "Első este", message: "Furcsa csend. Buckó a kádban aludt, mert hiányzott neki a tenger. A többiek a szőnyegen kempingeztek. 'Ha betörő jön, csapkodni fogok!'", char: "bucko", msgs: ["Jelentem: a ház biztonságos! A fürdőkádban alszom, onnan mindent hallok. 🐳", "Hogy te is nyugodtan aludj, küldök neked egy kis Levendulás párnapermentet. Szép álmokat!"] },
+            { id: 3, title: "Palacsinta party", message: "Hanna főzött. Lila festék került a tésztába. Az első palacsinta a plafonra ragadt. Buckó sósat kért, de spenótos lett.", char: "hanna", msgs: ["Bocsi a konyháért... 😅 Kicsit lila lett a plafon. De ígérem, letakarítjuk!", "Ha már mi összekentük magunkat, te kend be az arcodat ezzel a finom Krémes arcmaszkkal. Jót fog tenni!"] },
+            { id: 4, title: "Takarítás", message: "A liszt úgy szállt, mint a hó. Herold porszívózott, Buckó vizet spriccelt. Herold elcsúszott a tócsában.", char: "herold", msgs: ["Mama! Ma én voltam a porszívó-király! 👑 Bár elcsúsztam egy tócsában, de a ház ragyog. Büszke lennél ránk!", "Neked csak a pihenés maradt: itt van egy Micellás víz, hogy az arcod is olyan tiszta legyen, mint a padlónk!"] },
+            { id: 5, title: "Kincsvadászat", message: "Találtak egy térképet. 'Kalózkincs!' - kiáltotta Buckó. Kincs helyett Papa papucsa lett meg.", char: "bucko", msgs: ["Képzeld! Találtunk kincset!! 🏴‍☠️ Jó, nem aranyat, hanem Apa papucsát, de szerintem ez még értékesebb.", "De neked találtunk igazi aranyat! Tedd fel ezt az Arany szemmaszkot, és ragyogj!"] },
+            // ...
         ];
+
+        // Generáljuk a többit
         for(let i=storyData.length + 1; i<=24; i++) {
-            storyData.push({ id: i, title: `${i}. Nap`, message: "Még készül a történet...", char: "herold", msgs: ["Szia Mama! Még dolgozunk ezen a napon!", "Addig is itt egy kis szeretet csomag!"], replies: [{u: "Köszi!", c: "Szívesen! Szia!"}] });
+            storyData.push({ id: i, title: `${i}. Nap`, message: "Még készül a történet...", char: "herold", msgs: ["Szia Mama! Még dolgozunk ezen a napon!", "Addig is itt egy kis szeretet csomag!"] });
         }
 
-        // --- GEMINI AI SERVICE (HIBAKERESŐ MÓD) ---
+        // --- GEMINI AI ---
         async function callGemini(userMessage, characterKey, context) {
             const char = characters[characterKey];
             const prompt = `
@@ -108,27 +125,27 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
-                
-                // HIBAKERESÉS: Ha nem 200 OK a válasz
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error("API Error:", errorData);
-                    // Visszaadjuk a konkrét hibát a chatbe!
-                    return `⚠️ API HIBA: ${errorData.error?.message || response.statusText}`;
+                    const err = await response.json();
+                    throw new Error(err.error?.message || "Hálózati hiba");
                 }
-
                 const data = await response.json();
                 return data.candidates[0].content.parts[0].text;
             } catch (e) {
-                console.error("Fetch Error:", e);
-                // Visszaadjuk a hálózati hibát a chatbe!
-                return `⚠️ HÁLÓZATI HIBA: ${e.message}`;
+                return `⚠️ Hiba: ${e.message} (Próbáld újra!)`;
             }
         }
 
+        // --- FŐ KOMPONENS ---
         function App() {
-            const [unlockedDays, setUnlockedDays] = useState([]);
-            const [chatHistory, setChatHistory] = useState({});
+            // Biztonságos adatbetöltés
+            const [unlockedDays, setUnlockedDays] = useState(() => {
+                try { return JSON.parse(localStorage.getItem('openedDays')) || [] } catch { return [] }
+            });
+            const [chatHistory, setChatHistory] = useState(() => {
+                try { return JSON.parse(localStorage.getItem('chatHistory2')) || {} } catch { return {} }
+            });
+
             const [activeModal, setActiveModal] = useState(null);
             const [currentDay, setCurrentDay] = useState(null);
             const [notifications, setNotifications] = useState([]);
@@ -141,17 +158,14 @@
             const chatEndRef = useRef(null);
 
             useEffect(() => {
-                const savedDays = JSON.parse(localStorage.getItem('openedDays')) || [];
-                const savedChats = JSON.parse(localStorage.getItem('chatHistory2')) || {};
-                setUnlockedDays(savedDays);
-                setChatHistory(savedChats);
-                setUnreadCount(savedDays.length > 0 ? 1 : 0); // Egyszerűsített unread
+                setUnreadCount(unlockedDays.length > 0 ? 1 : 0);
             }, []);
 
             useEffect(() => {
                 const t = setInterval(() => {
                     const target = new Date("Dec 24, 2025 18:00:00").getTime();
-                    const diff = target - new Date().getTime();
+                    const now = new Date().getTime();
+                    const diff = target - now;
                     if (diff > 0) {
                         const d = Math.floor(diff / (1000 * 60 * 60 * 24));
                         const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -200,7 +214,7 @@
                 }
             };
 
-            const openChat = () => { setUnreadCount(0); setActiveModal('chatList'); };
+            const openChatList = () => { setUnreadCount(0); setActiveModal('chatList'); };
 
             const openChatDetail = (charKey) => {
                 const relevantDays = unlockedDays.map(id => storyData.find(d => d.id === id)).filter(d => d.char === charKey).sort((a,b) => a.id - b.id);
@@ -227,42 +241,13 @@
                 const context = `Mese: ${currentDay.message}. Ajándék: ${currentDay.msgs[1]}`;
                 const aiResponseText = await callGemini(text, charKey, context);
                 
-                const isError = aiResponseText.startsWith("⚠️"); // Ellenőrizzük, hibaüzenet-e
-                
+                const isError = aiResponseText.startsWith("⚠️");
                 const aiMsg = { text: aiResponseText, isMe: false, isError: isError };
                 const finalHistory = { ...updatedHistory, [dayId]: [...updatedHistory[dayId], aiMsg] };
                 
                 setTypingDay(null);
                 setChatHistory(finalHistory);
                 localStorage.setItem('chatHistory2', JSON.stringify(finalHistory));
-            };
-
-            const handleReply = (dayId, replyIndex) => {
-                const day = storyData.find(d => d.id === dayId);
-                const reply = day.replies[replyIndex];
-                
-                let currentChats = chatHistory[dayId] || [];
-                // Hozzáadjuk a választ és a reakciót
-                currentChats = [...currentChats, { text: reply.u, isMe: true }];
-                
-                // Frissítjük a state-et, hogy megjelenjen a user üzenet
-                const tempHistory = { ...chatHistory, [dayId]: currentChats };
-                setChatHistory(tempHistory);
-
-                setTypingDay(dayId); // Animáció
-
-                setTimeout(() => {
-                   currentChats = [...currentChats, { text: reply.c, isMe: false }];
-                   // Mentjük, hogy válaszoltunk (replyIndex)
-                   // Itt a chatHistory-ba magába nem mentjük a replyIndexet, 
-                   // hanem a struktúrába kéne, de most egyszerűsítve csak berakjuk az üzenetet.
-                   // A gombok eltűnését úgy kezeljük, hogy megnézzük, van-e már user üzenet a chaten.
-                   
-                   const finalHistory = { ...chatHistory, [dayId]: currentChats };
-                   setTypingDay(null);
-                   setChatHistory(finalHistory);
-                   localStorage.setItem('chatHistory2', JSON.stringify(finalHistory));
-                }, 2000);
             };
 
             const fullReset = () => { localStorage.clear(); location.reload(); };
@@ -286,7 +271,7 @@
 
                     <div className="notification-container">
                         {notifications.map(n => (
-                            <div key={n.id} className="notification" onClick={openChat}>
+                            <div key={n.id} className="notification" onClick={openChatList}>
                                 <div style={{fontSize: '24px'}}>{n.icon}</div>
                                 <div><div style={{fontWeight: 'bold', marginBottom: '2px'}}>{n.name}</div><div style={{fontSize: '12px', opacity: 0.8}}>{n.text}</div></div>
                             </div>
@@ -315,7 +300,6 @@
                         <div className="msg-btn" onClick={openChatList}>💬 Üzenetek {unreadCount > 0 && <div className="badge">{unreadCount}</div>}</div>
                     </div>
 
-                    {/* MESE */}
                     {activeModal === 'story' && currentDay && (
                         <div className="modal-overlay" onClick={() => setActiveModal(null)}>
                             <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -326,7 +310,6 @@
                         </div>
                     )}
 
-                    {/* CHAT LISTA */}
                     {activeModal === 'chatList' && (
                         <div className="modal-overlay" onClick={() => setActiveModal(null)}>
                             <div className="modal-content chat-modal" onClick={e => e.stopPropagation()}>
@@ -351,7 +334,6 @@
                         </div>
                     )}
 
-                    {/* CHAT RÉSZLETEK */}
                     {activeModal === 'chatDetail' && currentDay && (
                         <div className="modal-overlay" onClick={() => setActiveModal('chatList')}>
                             <div className="modal-content chat-modal" onClick={e => e.stopPropagation()}>
@@ -361,9 +343,6 @@
                                 <div className="chat-list">
                                     {unlockedDays.map(id => storyData.find(d => d.id === id)).filter(d => d.char === currentDay.char).sort((a,b) => a.id - b.id).map(day => {
                                         const history = chatHistory[day.id] || [];
-                                        // Ellenőrizzük, hogy volt-e már user interakció (van-e isMe: true üzenet)
-                                        const hasUserReplied = history.some(m => m.isMe);
-
                                         return (
                                             <div key={day.id} className="msg-group">
                                                 <div className="date-label">December {day.id}.</div>
@@ -373,14 +352,6 @@
                                                         <div className={`msg ${msg.isMe ? 'me' : 'them'} ${msg.isError ? 'error' : ''}`}>{msg.text}</div>
                                                     </div>
                                                 ))}
-                                                {/* GOMBOK: Csak akkor, ha még NEM válaszoltunk, ÉS ez a legutolsó nap, ÉS nem ír épp az AI */}
-                                                {!hasUserReplied && day.id === currentDay.id && !typingDay && (
-                                                    <div className="reply-area" style={{background:'transparent', padding:'5px 0'}}>
-                                                        {day.replies.map((r, idx) => (
-                                                            <div key={idx} className="reply-chip" onClick={() => handleReply(day.id, idx)}>{r.u}</div>
-                                                        ))}
-                                                    </div>
-                                                )}
                                             </div>
                                         )
                                     })}
