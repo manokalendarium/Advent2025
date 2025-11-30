@@ -81,7 +81,7 @@
         const { useState, useEffect, useRef, useLayoutEffect } = React;
 
         const characters = {
-            hanna: { name: "Hanna", icon: "🎀", desc: "rózsaszín, gondoskodó lány víziló", style: "Kedves, anyáskodó, sok emojit használ." },
+            hanna: { name: "Hanna", icon: "🎀", desc: "rózsaszín, gondoskodó lány víziló", style: "Kedves, cuki, ő a legfiatalabb. tele van szeretettel" },
             herold: { name: "Herold", icon: "🦛", desc: "lila, pufók és falánk víziló", style: "Vicces, éhes, szeleburdi." },
             bucko: { name: "Buckó", icon: "🐳", desc: "kék, bátor kis bálna", style: "Bátor, lelkes, vizet emleget." }
         };
@@ -104,7 +104,9 @@
             A gazdádnak, 'Mamának' írsz chat üzenetet. Stílusod: ${char.style}.
             A mai nap eseménye: ${context}.
             Válaszolj a Mamának erre: "${userMessage}".
-            Legyél rövid (max 2 mondat), kedves és vicces. Köszönj el a végén, mert dolgod van.
+            Legyél rövid (max 2 mondat), kedves, cuki és vicces.
+            reflektálj mindig arra amit írt a mama.
+            ne használj kötőjeleket.
             `;
 
             try {
