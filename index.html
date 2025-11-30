@@ -302,9 +302,9 @@
       }
 
       .day-card.opened {
-        background: rgba(0, 122, 255, 0.15);
-        border-color: rgba(0, 122, 255, 0.5);
-        box-shadow: 0 0 30px rgba(0, 122, 255, 0.25);
+        background: rgba(0, 255, 47, 0.15);
+        border-color: rgba(0, 255, 42, 0.5);
+        box-shadow: 0 0 30px rgba(0, 255, 26, 0.25);
         transform: scale(1.05);
       }
 
@@ -643,7 +643,7 @@
         display: flex;
         gap: 4px;
         align-items: center;
-        margin-left: 38px;
+
         border-bottom-left-radius: 4px;
         animation: popIn 0.3s;
       }
@@ -859,7 +859,7 @@
           <div class="api-card">
             <div style="font-size: 40px">🔑</div>
             <h2>Szia Mama!</h2>
-            <p>Kérlek add meg a szupertitkos jelszót, hogy felfedezd, mit is csinálunk itthon, miközben ti elutaztok!</p>
+            <p>Kérlek add meg a szupertitkos jelszót!</p>
             <input
               id="api-input"
               class="api-input"
@@ -1185,13 +1185,14 @@
           name: "Hanna",
           icon: "🎀",
           desc: "rózsaszín, gondoskodó lány víziló",
-          style: "Kedves, anyáskodó, sok emojit használ.",
+          style:
+            "Kedves, cuki kis cocli. Nagyon szereti a kakaót, és még bölcsibe jár. Hobbija a szaltózás és a táncizás.",
           key: "hanna",
         },
         herold: {
           name: "Herold",
           icon: "🦛",
-          desc: "lila, pufók és falánk víziló",
+          desc: "lila, pufók és falánk víziló. Nagyon szereti a kakaót és már oviba jár ahol állandóan bekakál. Hobbika a kakaó és a coccantgatás",
           style: "Vicces, éhes, szeleburdi.",
           key: "herold",
         },
@@ -1199,7 +1200,7 @@
           name: "Buckó",
           icon: "🐳",
           desc: "kék, bátor kis bálna",
-          style: "Bátor, lelkes, vizet emleget.",
+          style: "Bátor, lelkes, nagyon szereti a vizet.",
           key: "bucko",
         },
       };
@@ -1207,25 +1208,25 @@
       // --- DORGÁLÓ ÜZENETEK LISTÁJA ---
       const SCOLDING_MESSAGES = {
         hanna: [
-          "Mama, ne rosszalkodj, ezt még nem szabad! 🎀",
-          "Türelem, Mama! A meglepetések úton vannak. ✨",
-          "Ejnye-bejnye, valaki nagyon kíváncsi! 🤭",
-          "Még aludnunk kell párat, Mama! 😴",
-          "Hanna néni mindent lát! Még nincs itt az ideje. ☝️",
+          "Mama, ne rosszalkodj, ezt még nem szabad!",
+          "Türelem, Mama! A meglepetések úton vannak.",
+          "Ejnye-bejnye, valaki nagyon kíváncsi!",
+          "MAMA!! NEM!",
+          "Mama nagyon gyorsan fejezd be",
         ],
         herold: [
-          "Hé! Én is éhes vagyok, de még én is bírom! 🍩",
-          "Nem ér leselkedni! Még nincs kész a bejgli. 🥐",
-          "Ha most kinyitod, elszökik a karácsonyi manó! 🏃‍♂️",
-          "Brühühü, még nem szabad! De adsz egy kekszet? 🍪",
-          "Nyugi Mama, a csoki nem szalad el! (Remélem) 🍫",
+          "Mama, most azonnal fejezd be!",
+          "Mama, ezt nem szabad!",
+          "Kicsit várj már, Mama!",
+          "Mama most azonnal fejezd ezt be!",
+          "Mama, ne nyomkodj már rá ezekre!",
         ],
         bucko: [
-          "Állj! A bázis lezárva! 🐳",
-          "Szigorúan titkos tartalom! Belépés tilos! 🚫",
-          "A radarképem szerint még korán van, Mama! 📡",
-          "Visszavonulót fújok! Még várni kell! 🎺",
-          "Biztonsági protokoll: Az ajándékok még töltődnek! ⚡",
+          "Mama, nem!",
+          "Buckó vagyok, és ezt nem engedem meg Mama.",
+          "Ezt be lehet fejezni Mama!",
+          "Mama, légyszi fejezd be.",
+          "Mama, olyat fogok mondani, hogy csak na.",
         ],
       };
 
@@ -1908,12 +1909,32 @@
       }
 
       // --- GEMINI API ---
-      async function callGemini(userMessage, characterKey, context) {
-        if (!state.apiKey) return "Nincs Gemini kulcs! 🥯";
-        // API hívás szimuláció a demóhoz (itt lenne a fetch)
-        return "Ez egy teszt válasz a vízilótól! 🦛";
-      }
+      // --- GEMINI API LOGIKA ---
+      // --- AI SERVICE (GEMINI 2.0 FLASH) - BIZTONSÁGOS KULCSKEZELÉS ---
+      async function callGemini(apiKey, userMessage, characterKey, context) {
+        const char = CHARACTERS[characterKey];
+        const systemPrompt = `You are ${char.name}, a ${char.desc}. You are texting your owner 'Mama'. Style: ${char.style}.  Context: ${context} Reply to: "${userMessage}". Keep it short (max 2 sentences), cute, funny. End with a goodbye reason. Language: Hungarian.`;
 
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const payload = {
+          contents: [{ parts: [{ text: systemPrompt }] }],
+          generationConfig: { temperature: 0.7 },
+        };
+
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error?.message || "API Error");
+          return data.candidates[0].content.parts[0].text;
+        } catch (e) {
+          console.error(e);
+          return "Most tele a szám bejglivel, de egyetértek! 🥯 (Offline mód)";
+        }
+      }
       function handleDayClick(day) {
         playSound("pop");
         const today = state.testMode ? 31 : new Date().getDate();
@@ -1962,44 +1983,69 @@
         }
       }
 
+      // --- ÜZENETKÜLDÉS KEZELÉSE ---
       async function sendMessage(text) {
-        playSound("pop");
         const trimmedText = text.trim();
+
+        // Ha üres a szöveg, vagy épp ír az AI, vagy nincs kiválasztva nap, nem csinálunk semmit
         if (!trimmedText || state.typing || !state.currentDayId) return;
 
+        playSound("pop"); // Hang lejátszása
+
+        // 1. Adatok előkészítése
         const dayId = state.currentDayId;
         const day = STORY_DATA.find((d) => d.id === dayId);
         if (!day) return;
 
         let currentHist = state.chatHistory[dayId] || { msgs: [] };
+
+        // 2. A felhasználó üzenetének azonnali megjelenítése
         const userMessage = { text: trimmedText, isMe: true };
         const msgsAfterUser = [...currentHist.msgs, userMessage];
 
+        // Mentés és renderelés (hogy lásd, amit írtál)
         saveState("chatHistory", {
           ...state.chatHistory,
           [dayId]: { ...currentHist, msgs: msgsAfterUser, seen: true },
         });
 
+        // Input mező törlése
         ELEMENTS.chatInput.value = "";
         ELEMENTS.chatSendCircle.classList.add("disabled");
+
+        // 3. "Ír..." állapot bekapcsolása
         state.typing = true;
-        renderChatDetail();
+        renderChatDetail(); // Ez kirajzolja a három pöttyöt (typing bubble)
 
-        await new Promise((r) => setTimeout(r, 1500));
+        // 4. Késleltetés (hogy természetesebbnek tűnjön) + API hívás
+        // Összeállítjuk a kontextust az AI-nak (mese eleje + ajándék)
+        const contextInfo = `Mese részlet: ${day.storyPage1.substring(
+          0,
+          100
+        )}... Mama ezt ajándékot kapta ma: ${day.gift}`;
 
-        const context = `Mese: ... Ajándék: ...`;
-        const response = await callGemini(trimmedText, day.char, context);
+        const responseText = await callGemini(
+          state.apiKey, // <--- Ezt hagytad ki!
+          trimmedText,
+          day.char,
+          contextInfo
+        );
 
+        // 5. Válasz megérkezett
         state.typing = false;
-        playSound("ding");
+        playSound("ding"); // Értesítő hang
 
-        const finalMsgs = [...msgsAfterUser, { text: response, isMe: false }];
-        const finalHist = {
+        // 6. AI válasz hozzáadása a listához
+        const finalMsgs = [
+          ...msgsAfterUser,
+          { text: responseText, isMe: false },
+        ];
+
+        // Végső mentés és renderelés
+        saveState("chatHistory", {
           ...state.chatHistory,
           [dayId]: { msgs: finalMsgs, seen: true },
-        };
-
-        saveState("chatHistory", finalHist);
+        });
       }
 
       // --- RENDEREREK ---
