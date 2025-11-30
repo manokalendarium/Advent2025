@@ -334,7 +334,7 @@
             const [typing, setTyping] = useState(false);
             const [inputText, setInputText] = useState("");
             const [testMode, setTestMode] = useState(false);
-            // ÚJ ÁLLAPOT
+            // ÚJ ÁLLAPOT az értesítés késleltetéséhez
             const [notifAfterCloseDayId, setNotifAfterCloseDayId] = useState(null);
 
             const chatEndRef = useRef(null);
@@ -355,7 +355,7 @@
                 return () => clearInterval(t);
             }, [unlockedDays, chatHistory]);
 
-            // ÚJ useEffect: Értesítés megjelenítése a 'story' modal bezárása után
+            // ÚJ useEffect: Értesítés megjelenítése a 'story' modal bezárása UTÁN
             useEffect(() => {
                 if (view === 'grid' && notifAfterCloseDayId !== null) {
                     const day = storyData.find(d => d.id === notifAfterCloseDayId);
@@ -371,7 +371,7 @@
                     // Töröljük az állapotot, hogy ne jelenjen meg újra
                     setNotifAfterCloseDayId(null);
                 }
-            }, [view]); // Figyeli a 'view' állapotot
+            }, [view, notifAfterCloseDayId]); // Fontos a függőségek helyes beállítása!
 
             useLayoutEffect(() => {
                 if(view === 'chatDetail') chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -400,8 +400,6 @@
                         
                         // ELMENTJÜK AZ AZONOSÍTÓT, HOGY A MODAL BEZÁRÁSA UTÁN ÉRTESÍTSE
                         setNotifAfterCloseDayId(day.id); 
-                        
-                        // Töröljük az azonnali értesítés logikát!
                     }
                     setCurrentDay(day);
                     setView('story');
